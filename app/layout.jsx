@@ -1,4 +1,3 @@
-import localFont from "next/font/local";
 import "@styles/globals.css";
 import Provider from "@components/Provider"
 import Nav from "@components/Nav"
@@ -9,6 +8,7 @@ export const metadata = {
 };
 
 export const RootLayout = ({ children }) => {
+  
   return (
     <html lang="en">
       <head>
@@ -18,7 +18,7 @@ export const RootLayout = ({ children }) => {
         <Provider>
 
           <main className = "flex h-screen">
-            <Nav/>
+            <Nav />
             {children}
           </main>
           

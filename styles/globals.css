@@ -21,11 +21,11 @@ body {
 }
 
 .head_text {
-  @apply mt-5 text-5xl font-extrabold leading-[1.15] text-black sm:text-6xl;
+  @apply mt-5 text-5xl font-extrabold leading-[1.15] sm:text-6xl;
 }
 
 .desc_text {
-  @apply mt-5 text-lg text-gray-600 sm:text-xl max-w-2xl;
+  @apply mt-5 text-lg sm:text-xl max-w-2xl;
 }
 
 .main {
@@ -36,6 +36,21 @@ body {
   justify-content: center;
   padding: 120px 24px 160px 24px;
   pointer-events: none;
+  transition: background-color 0.3s ease;
+}
+
+.nav{
+  transition: background-color 0.3s ease;
+}
+
+.nav.dark{
+  background-color: #21222A;
+}
+
+/* Dark mode */
+html.dark body {
+  background-color: #282D35;
+  color: #FFFFFF;
 }
 
 .logo{
@@ -77,6 +92,9 @@ body {
   transition: transform 0.2s linear;
 }
 
+.checkbox:checked + .checkbox-label .ball {
+  transform: translateX(24px);
+}
 
 .signInbutton{
   display: flex;
@@ -89,10 +107,11 @@ body {
   font-weight:500;
   font-size: large;
   padding: 5px;
-  border-radius: 45%;
+  border-radius: 5%;
 }
 
 .landingPageIntroBox{
+  font-family: 'Raleway', Arial, Helvetica, sans-serif;
   justify-content: center;
   align-items: center;
 }
