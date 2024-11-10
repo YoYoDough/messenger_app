@@ -1,6 +1,27 @@
+"use client"
 import Link from "next/link"
+import { useState, useEffect } from 'react'
+import { useSession, signIn, signOut, getProviders } from "next-auth/react"
 
 const LoginCard = () => {
+    const {data: session} = useSession();
+    const [providers, setProviders] = useState(null);
+
+    const [userData, setUserData] = useState({
+        email: "",
+        password: "",
+        img: "defaultUserImg.png"
+    })
+
+    useEffect(() => {
+        const setUpProviders = async () => {
+          const response = await getProviders();
+          setProviders(response);
+        };
+        setUpProviders();
+      }, []);
+
+      console.log(providers);
   return (
     <div className = "flex flex-col shadow p-10 w-200">
         <h1 className = "font-poppins font-bold text-lg">Login to your Account</h1>
@@ -25,12 +46,17 @@ const LoginCard = () => {
             <div className = "w-full h-px bg-gray-300"></div>
         </div>
 
-        <button className = "w-full flex justify-center bg-gray-300 text-black rounded mt-3 p-2">
-            <span className = "flex items-center">
-                <p className = "text-lg">Sign in with</p>
-                <img className = "ml-2 w-8" src = "/googleLogo.png"></img>
-            </span>
-        </button>
+        {providers && (
+            Object.values(providers).map((provider) => (
+                <button type = "button" key = {provider.name} onClick = {() => signIn(provider.id)}className = "w-full flex justify-center bg-gray-300 text-black rounded mt-3 p-2">
+                    <span className = "flex items-center">
+                        <p className = "text-lg">Sign in with</p>
+                        <img className = "ml-2 w-8" src = "/googleLogo.png"></img>
+                    </span>
+                </button>
+            ))
+        )}
+        
     </div>
   )
 }

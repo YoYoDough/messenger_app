@@ -3,11 +3,9 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faMoon, faSun } from "@fortawesome/free-solid-svg-icons";
+import { useSession } from "next-auth/react";
 
 const Nav = ({noNav}) => {
-    if (noNav === true){
-        return null;
-    }
   const [darkMode, setDarkMode] = useState(false);
 
   const toggleDarkMode = () => {
@@ -44,9 +42,18 @@ const Nav = ({noNav}) => {
           </label>
         </div>
 
-        <Link href="/login" className="signInbutton self-center mt-auto mb-20">
-          <p>Sign in</p>
-        </Link>
+        {!session?.user ? (
+          <>
+            <Link href="/login" className="signInbutton self-center mt-auto mb-20">
+              <p>Sign in</p>
+            </Link>
+          </>
+        ) :
+          <img>
+          
+          </img>
+        }
+        
       </nav>
     </div>
   );
