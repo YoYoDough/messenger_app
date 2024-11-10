@@ -6,6 +6,7 @@ import { faMoon, faSun } from "@fortawesome/free-solid-svg-icons";
 import { useSession } from "next-auth/react";
 
 const Nav = ({noNav}) => {
+  const {data: session} = useSession();
   const [darkMode, setDarkMode] = useState(false);
 
   const toggleDarkMode = () => {

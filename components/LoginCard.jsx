@@ -31,11 +31,11 @@ const LoginCard = () => {
         </span>
         
         <form className = "flex flex-col justify-center items-center m-4 p-10">
-            <input className = "w-full border border-gray-300 rounded-md p-2 m-2" type = "email" placeholder="Email Address">
+            <input className = "w-full border border-gray-300 rounded-md p-2 m-2" type = "email" name = "email" value = {userData.email} placeholder="Email Address" required>
 
             </input>
 
-            <input className = "w-full border border-gray-300 rounded-md p-2 m-2" type = "password" placeholder="Password"></input>
+            <input className = "w-full border border-gray-300 rounded-md p-2 m-2" type = "password" name = "password" value = {userData.password} placeholder="Password"></input>
 
             <button className = "w-full h-10 bg-blue-400 rounded m-2 p-2" type = "submit">Login with email</button>
         </form>
