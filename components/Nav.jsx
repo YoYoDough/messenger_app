@@ -44,7 +44,7 @@ const Nav = ({noNav}) => {
           </label>
         </div>
 
-        <Link href="/signIn" className="signInbutton self-center mt-auto mb-20">
+        <Link href="/login" className="signInbutton self-center mt-auto mb-20">
           <p>Sign in</p>
         </Link>
       </nav>

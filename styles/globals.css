@@ -17,7 +17,7 @@
 body {
   color: var(--foreground);
   background: var(--background);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: 'Poppins', Arial, Helvetica, sans-serif;
 }
 
 .head_text {
@@ -25,6 +25,7 @@ body {
 }
 
 .desc_text {
+  font-family: 'Poppins', Arial, Helvetica, sans-serif;
   @apply mt-5 text-lg sm:text-xl max-w-2xl;
 }
 
@@ -36,8 +37,14 @@ body {
   justify-content: center;
   padding: 120px 24px 160px 24px;
   pointer-events: none;
+  
+}
+
+html body{
   transition: background-color 0.3s ease;
 }
+
+
 
 .nav{
   transition: background-color 0.3s ease;

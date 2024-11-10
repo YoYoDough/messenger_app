@@ -1,11 +1,12 @@
 import Nav from '@components/Nav'
+import LoginCard from '@components/LoginCard'
 
 const page = () => {
-  const noNav = true;
-  console.log(noNav)
+  
   return (
-    <div>
-        <Nav noNav = {noNav}></Nav>
+    <div className = "w-full flex flex-col justify-center items-center">
+        
+        <LoginCard></LoginCard>
     </div>
   )
 }
