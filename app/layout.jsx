@@ -8,7 +8,7 @@ import { usePathname } from "next/navigation";
 
 export const RootLayout = ({ children }) => {
   const pathname = usePathname();
-  const hidenav = pathname === "/login"
+  const hidenav = pathname === "/login" || pathname === "/signUp"
   
   return (
     <html lang="en">

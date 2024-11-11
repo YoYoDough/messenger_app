@@ -122,3 +122,45 @@ html.dark main {
   justify-content: center;
   align-items: center;
 }
+
+.navbar{
+  position: relative;
+}
+
+.profile-btn {
+  position: relative; /* This is important for positioning the dropdown */
+}
+
+/* Dropdown styling */
+.dropdown {
+  display: flex;
+  position: absolute;
+  left: 100%; /* Position it to the right of the profile button */
+  bottom: 0; /* Align it to the top of the button */
+  background-color: white;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  min-width: 140px;
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+  z-index: 1000; /* Ensure it's above other elements */
+  justify-content: center;
+}
+
+.dropdown-content {
+  display: flex;
+  color: black;
+  flex-direction: column;
+  align-items: flex-start;
+  padding: 10px 0;
+}
+
+.dropdown button {
+  margin: 10px;
+  padding: 4px;
+  width: auto;
+  height: auto;
+}
+
+.dropdown button:hover{
+  background-color: grey;
+}

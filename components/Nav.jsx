@@ -4,10 +4,12 @@ import Link from "next/link";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faMoon, faSun } from "@fortawesome/free-solid-svg-icons";
 import { useSession } from "next-auth/react";
+import Dropdown from "@components/Dropdown";
 
 const Nav = ({noNav}) => {
   const {data: session} = useSession();
   const [darkMode, setDarkMode] = useState(false);
+  const [profileClicked, setProfileClicked] = useState(false);
 
   const toggleDarkMode = () => {
     setDarkMode(!darkMode);
@@ -22,9 +24,13 @@ const Nav = ({noNav}) => {
     }
   }, [darkMode]);
 
+  function handleProfileClick(){
+    setProfileClicked(!profileClicked);
+  }
+
   return (
     <div className={darkMode ? "dark" : ""}>
-      <nav className={`flex flex-col justify-content-start h-screen shadow nav ${darkMode ? "dark" : ""}`}>
+      <nav className={`navbar flex flex-col justify-content-start h-screen shadow nav ${darkMode ? "dark" : ""}`}>
         <Link href="/">
           <img src="logo.png" className="logo" alt="Logo" />
         </Link>
@@ -50,12 +56,18 @@ const Nav = ({noNav}) => {
             </Link>
           </>
         ) :
-          <img>
-          
-          </img>
+          <>
+            <button className = "profile-btn mt-auto mb-20 relative" onClick = {handleProfileClick}>
+              <img src = {session.user.image} className = "w-24 self-center justify-self-center rounded-full">
+                
+              </img>
+            </button>
+            {profileClicked && <Dropdown onClose = {handleProfileClick}/>}
+          </>
         }
         
       </nav>
+      
     </div>
   );
 };
