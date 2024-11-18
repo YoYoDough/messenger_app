@@ -1,10 +1,12 @@
 import Link from 'next/link';
 
-const NavButtons = ({hrefLink, src}) => {
+const NavButtons = ({title, hrefLink, src, alt}) => {
   return (
-    <Link href = {hrefLink}>
-        <img src = {src}></img>
-    </Link>
+    <button title = {title} className = "flex self-center w-20 justify-self-center hover:bg-gray-400  rounded-full">
+      <Link className = "self-center p-5" href = {hrefLink}>
+          <img className = "flex self-center justify-self-center w-full bg-transparent" src = {src} alt = {alt}></img>
+      </Link>
+    </button>
   )
 }
 

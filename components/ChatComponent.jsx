@@ -1,8 +1,11 @@
-import React from 'react'
+import ChatNav from "./ChatNav"
+
 
 const ChatComponent = () => {
   return (
-    <div>ChatComponent</div>
+    <>
+      <ChatNav></ChatNav>
+    </>
   )
 }
 

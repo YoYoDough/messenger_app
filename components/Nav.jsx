@@ -5,6 +5,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faMoon, faSun } from "@fortawesome/free-solid-svg-icons";
 import { useSession } from "next-auth/react";
 import Dropdown from "@components/Dropdown";
+import NavButtons from "./NavButtons";
 
 const Nav = ({noNav}) => {
   const {data: session} = useSession();
@@ -35,7 +36,16 @@ const Nav = ({noNav}) => {
           <img src="logo.png" className="logo" alt="Logo" />
         </Link>
 
-        <div className="self-center mt-96">
+        {session?.user && (
+          <div className = "navButtons mt-2">
+            <NavButtons title = "Messages" hrefLink = "/messages" src = "messageIcon.png" alt = "Messages Icon"/>
+            <NavButtons title = "Find Friends" hrefLink = "/findFriends" src = "friends.png" alt = "Friends Icon"/>
+            <NavButtons title = "Groups" hrefLink = "/groups" src = "groupIcon.png" alt = "Groups Icon"/>
+
+          </div>
+        )}
+
+        <div className="self-center mt-72">
           <input
             type="checkbox"
             className="checkbox"
@@ -57,9 +67,10 @@ const Nav = ({noNav}) => {
           </>
         ) :
           <>
+            
             <button className = "profile-btn mt-auto mb-20 relative" onClick = {handleProfileClick}>
             <div className = "flex items-left relative p-2">
-              <img className = "flex  ml-4 w-20 rounded-full bg-transparent"src = {session.user.image}></img>
+              <img className = "flex ml-4 w-20 rounded-full bg-transparent"src = {session.user.image}></img>
               <div className = "flex self-center justify-self-center absolute w-5 h-5 bg-green-400 rounded-full left-20 top-16"></div>
             </div>
             </button>

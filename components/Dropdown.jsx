@@ -1,4 +1,5 @@
 import { signOut } from 'next-auth/react';
+import Link from 'next/link';
 import { useState } from 'react'
 
 
@@ -14,7 +15,9 @@ const Dropdown = () => {
   return (
     <div className="dropdown mb-12">
       <div className="dropdown-content">
-        <button>Your Profile</button>
+        <Link href = "/profile">
+          <button>Your Profile</button>
+        </Link>
         <button onClick = {handleSignOut}>Sign out</button>
       </div>
     </div>
