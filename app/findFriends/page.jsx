@@ -57,10 +57,14 @@ const page = () => {
         <div className="mt-2 bg-white border rounded shadow">
           {searchResults.map((user) => (
             <div key={user.id} className="flex justify-between items-center text-black p-2 hover:bg-gray-200">
-              <p>{user.name}</p>
+              <div className = "flex items-center">
+                <img className = "w-10 mr-2 rounded-full"src = {user.image}></img>
+                <p>{user.name}</p>
+              </div>
+              
               <div className = "flex justify-center items-center">
-                <button onClick = {handleFriendAdd} className = "flex w-10 align-self-center hover:bg-gray-400 rounded-full mr-1"><img src = "addFriend.png"></img></button>
-                <button onClick = {handleChatClick} className = "flex w-10 align-self-center hover:bg-gray-400 rounded-full p-1"><img src = "sendMessage.png"></img></button>
+                <button title = "Add as a friend"onClick = {handleFriendAdd} className = "flex w-10 align-self-center hover:bg-gray-400 rounded-full mr-1"><img src = "addFriend.png" alt = "Add friend image"></img></button>
+                <button title = "Send message" onClick = {handleChatClick} className = "flex w-10 align-self-center hover:bg-gray-400 rounded-full p-1"><img src = "sendMessage.png" alt = "Send message image"></img></button>
               </div>
             </div>
           ))}
