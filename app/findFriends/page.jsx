@@ -1,5 +1,5 @@
 "use client"
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { useSession } from "next-auth/react";
 
 
@@ -8,6 +8,8 @@ const page = () => {
     console.log(session);
     const [input, setInput] = useState(""); // Search input
     const [searchResults, setSearchResults] = useState([]); // Filtered users
+    const [addedFriends, setAddedFriends] = useState([]);
+    const [isDisabled, setIsDisabled] = useState(false);
     const [allUsers, setAllUsers] = useState([]); // Full list of users
     const [showDropdown, setShowDropdown] = useState(false);
     const [showChatComponent, setShowChatComponent] = useState();
@@ -20,6 +22,7 @@ const page = () => {
     const handleChatClick = () => {
       //get user id from session email
     }
+    
 
     const handleFriendAdd = async(user) => {
       const response = await fetch(`http://localhost:8080/api/friends/friendrequest?email=${session?.user.email}`, {
@@ -32,6 +35,8 @@ const page = () => {
           status: "pending",
         })
       })
+      setAddedFriends((prev)=> [...prev, user.id])
+      setIsDisabled(true);
 
       console.log(response);
     }
@@ -64,9 +69,30 @@ const page = () => {
 
     const handleChange = (e) =>{
         fetchUsersFromInput(e.target.value)
-        setInput(e.target.value);
-        
+        setInput(e.target.value)
     }
+    
+    useEffect(() => {
+      const fetchFriends = async () => {
+          if (!session?.user.email) return;
+          try {
+              const email = session.user.email;
+              const response = await fetch(`http://localhost:8080/api/friends/requested?email=${email}`);
+              if (!response.ok) throw new Error("Failed to fetch friends");
+              const friends = await response.json();
+              setAddedFriends(friends);
+          } catch (error) {
+              console.error("Error fetching friends:", error);
+          }
+      };
+  
+      fetchFriends();
+  }, [session?.user.email]);
+    console.log(addedFriends)
+
+    
+
+
   return (
     <div className  = "flex flex-col p-10 m-10">
         <h1 className = "head_text">Find new people to connect with!</h1>
@@ -82,7 +108,7 @@ const page = () => {
               </div>
               
               <div className = "flex justify-center items-center">
-                <button title = "Add as a friend" onClick = {() => handleFriendAdd(user)} className = "flex w-10 align-self-center hover:bg-gray-400 rounded-full mr-1"><img src = "addFriend.png" alt = "Add friend image"></img></button>
+                <button title = {isDisabled === true || addedFriends.includes(user.id) ? "Friend added": "Add as a friend"} onClick = {() => handleFriendAdd(user)} className = "flex w-10 align-self-center hover:bg-gray-400 rounded-full mr-1" disabled = {addedFriends.includes(user.id) || isDisabled}><img src = "addFriend.png" alt = "Add friend image"></img></button>
                 <button title = "Send message" onClick = {handleChatClick} className = "flex w-10 align-self-center hover:bg-gray-400 rounded-full p-1"><img src = "sendMessage.png" alt = "Send message image"></img></button>
               </div>
             </div>
