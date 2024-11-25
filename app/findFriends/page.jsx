@@ -17,26 +17,23 @@ const page = () => {
     let userId;
     console.log(userId);
 
-    const getUsersId = async(userId) => {
+    const handleChatClick = () => {
       //get user id from session email
     }
 
-    const handleFriendAdd = async(user, userId) => {
-      const response = await fetch("http://localhost:8080/api/friends", {
+    const handleFriendAdd = async(user) => {
+      const response = await fetch(`http://localhost:8080/api/friends/friendrequest?email=${session?.user.email}`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json"
         },
-        body: {
-          user_id: userId,
+        body: JSON.stringify({
           friend_id: user.id,
           status: "pending",
-        }
+        })
       })
-    }
 
-    const handleChatClick = () => {
-
+      console.log(response);
     }
 
     const fetchUsersFromInput = async(input, userId) => {
