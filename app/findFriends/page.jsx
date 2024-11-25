@@ -2,6 +2,8 @@
 import { useEffect, useState } from "react"
 import { useSession } from "next-auth/react";
 
+import Link from "next/link";
+
 
 const page = () => {
     const { data: session } = useSession();
@@ -12,16 +14,11 @@ const page = () => {
     const [isDisabled, setIsDisabled] = useState(false);
     const [allUsers, setAllUsers] = useState([]); // Full list of users
     const [showDropdown, setShowDropdown] = useState(false);
-    const [showChatComponent, setShowChatComponent] = useState();
 
     console.log(searchResults);
 
     let userId;
     console.log(userId);
-
-    const handleChatClick = () => {
-      //get user id from session email
-    }
     
 
     const handleFriendAdd = async(user) => {
@@ -95,6 +92,7 @@ const page = () => {
 
   return (
     <div className  = "flex flex-col p-10 m-10">
+
         <h1 className = "head_text">Find new people to connect with!</h1>
         <input className = "text-black w-30 h-10 mt-5 p-2"type = "text" onChange = {handleChange} placeholder = "Type in the user's correct name along with # tag">
 
@@ -109,7 +107,7 @@ const page = () => {
               
               <div className = "flex justify-center items-center">
                 <button title = {isDisabled === true || addedFriends.includes(user.id) ? "Friend added": "Add as a friend"} onClick = {() => handleFriendAdd(user)} className = "flex w-10 align-self-center hover:bg-gray-400 rounded-full mr-1" disabled = {addedFriends.includes(user.id) || isDisabled}><img src = "addFriend.png" alt = "Add friend image"></img></button>
-                <button title = "Send message" onClick = {handleChatClick} className = "flex w-10 align-self-center hover:bg-gray-400 rounded-full p-1"><img src = "sendMessage.png" alt = "Send message image"></img></button>
+                <Link href = {{pathname: "/chatPage", query: {userId: user.id, userName: user.name, userImage: user.image}}}><button title = "Send message" onClick = {() => handleChatClick(user)} className = "flex w-10 align-self-center hover:bg-gray-400 rounded-full p-1"><img src = "sendMessage.png" alt = "Send message image"></img></button></Link>
               </div>
             </div>
           ))}

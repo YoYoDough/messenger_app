@@ -4,7 +4,7 @@ import { io } from "socket.io-client"
 
 let socket;
 
-const ChatComponent = () => {
+const ChatComponent = ({userId, userName, userImage}) => {
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState("");
 
@@ -29,7 +29,7 @@ const ChatComponent = () => {
   }
   return (
     <div>
-      <ChatNav></ChatNav>
+      <ChatNav userName = {userName} userImage = {userImage}></ChatNav>
       <div>
         {messages.map((msg, index) => (
           <p key = {index}>{msg}</p>
