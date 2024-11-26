@@ -9,7 +9,7 @@ const ChatComponent = ({userId, userName, userImage}) => {
   const [input, setInput] = useState("");
 
   useEffect(() => {
-    socket = io();
+    socket = io("http://localhost:8081");
     console.log(socket)
     socket.on("receiveMessages", (message) => {
       setMessages((prev)=> [...prev, message]);
