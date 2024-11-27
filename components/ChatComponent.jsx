@@ -1,3 +1,5 @@
+"use client"
+import { useSession } from "next-auth/react";
 import ChatNav from "./ChatNav"
 import {useState, useEffect } from 'react'
 import { io } from "socket.io-client"
@@ -5,8 +7,13 @@ import { io } from "socket.io-client"
 let socket;
 
 const ChatComponent = ({userId, userName, userImage}) => {
+  const {data: session} = useSession()
+  console.log(session)
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState("");
+  console.log(messages);
+
+  const name = userName.split("#")[0];
 
   useEffect(() => {
     socket = io("http://localhost:8081");
@@ -22,25 +29,52 @@ const ChatComponent = ({userId, userName, userImage}) => {
 
   const sendMessage = () => {
     if (input.trim()){
-      socket.emit("sendMessage", input);
-      setMessages((prev) => [...prev, input]);
-      setInput("");
+      if (socket) {
+        socket.emit("sendMessage", { text: input, userId, userName }); // Pass relevant data.
+        setMessages((prev) => [...prev, { text: input, userId, userName }]); // Update local state.
+        setInput(""); // Clear the input.
+      } else {
+        console.error("Socket not initialized!");
+      }
     }
   }
+
+
   return (
-    <div>
+    <div className = "flex flex-col w-full h-screen">
       <ChatNav userName = {userName} userImage = {userImage}></ChatNav>
-      <div>
+      {/* Messages Area */}
+      <div className="flex-1 flex flex-col gap-2 overflow-y-auto p-4">
         {messages.map((msg, index) => (
-          <p key = {index}>{msg}</p>
+          <div
+            key={index}
+            className={`inline-block w-fit max-w-[80%] p-3 rounded-md mb-2 ${
+              msg.userId !== userId ? "bg-gray-300 self-end" : "bg-blue-500 text-white"
+            } break-words`}
+          >
+            {msg.mySelf}
+            {msg.selfImage}
+            {msg.text}
+          </div>
         ))}
       </div>
-      <input type = "text" value = {input} onChange={(e)=> setInput(e.target.value)}>
       
-      </input>
-      <button onClick = {sendMessage}>
-        Send
-      </button>
+      {/* Input Area */}
+      <div className="flex p-4 shadow">
+        <input
+          type="text"
+          value={input}
+          onChange={(e) => setInput(e.target.value)}
+          className="flex-1 p-2 rounded-md outline-none bg-black bg-opacity-50 text-white placeholder-gray-200"
+          placeholder={`Message @${name}`}
+        />
+        <button
+          onClick={sendMessage}
+          className="ml-2 px-4 py-2 bg-blue-500 text-white rounded-md"
+        >
+          Send
+        </button>
+      </div>
     </div>
   )
 }

@@ -8,10 +8,13 @@ const page = ({searchParams}) => {
     const params = use(searchParams)
     const {userName, userId, userImage} = params
     console.log(userName, userId, userImage);
+
+    if (!userId || !userName || !userImage) {
+      return <div>Loading...</div>; // Handle case where query params are not ready
+    }
+
   return (
-    <div>
-        <ChatComponent userId = {userId} userName = {userName} userImage = {userImage}></ChatComponent>
-    </div>
+      <ChatComponent userId = {userId} userName = {userName} userImage = {userImage}></ChatComponent>
   )
 }
 

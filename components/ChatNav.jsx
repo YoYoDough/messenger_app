@@ -3,14 +3,15 @@ import { useSession } from "next-auth/react"
 
 const ChatNav = ({userImage, userName}) => {
     const { data: session} = useSession();
+    const name = userName.split("#")[0]
   return (
-    <nav className = "flex justify-between h-20">
-      <img className = {"/defaultUserImg.png"}></img>
-            <div className = "flex self-center justify-self-center absolute w-5 h-5 bg-green-400 rounded-full left-28 top-14"></div>
-            <p>{userName}</p>
-        
-        <div className = "w-3 bg-green"></div>
-    </nav>
+    <div className = "flex justify-between p-4 shadow items-center">
+      <div className = "flex items-center">
+        <img src = {userImage} className="w-20 rounded-full ml-20" alt = {`${name}'s profile`}></img>
+        <h1 className = "text-xl font-bold ml-4">{userName}</h1>
+      </div>
+      
+    </div>
   )
 }
 
