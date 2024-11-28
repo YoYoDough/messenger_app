@@ -11,9 +11,23 @@ const ChatComponent = ({userId, userName, userImage}) => {
   console.log(session)
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState("");
+  const [selfId, setSelfId] = useState(0);
   console.log(messages);
 
   const name = userName.split("#")[0];
+
+  console.log(session?.user.name);
+
+  useEffect(() => {
+    if (!session?.user.name) return;
+    const getSelfId = async() => {
+      const response = await fetch(`http://localhost:8080/api/users/self?name=${session?.user.name}`)
+      const data = await response;
+      setSelfId(prevId => prevId = data);
+    }
+    getSelfId();
+  }, [session?.user.name])
+  console.log(selfId);
 
   useEffect(() => {
     socket = io("http://localhost:8081");
