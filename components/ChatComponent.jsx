@@ -108,7 +108,17 @@ const ChatComponent = ({userId, userName, userImage}) => {
       </div>
       
       {/* Input Area */}
-      <div className="flex p-4 shadow">
+      <div className="flex p-4 shadow items-center">
+        <input
+          type="file"
+          accept="image/*"
+          className="hidden"
+          id="image-upload"
+          onChange={(e) => handleImageUpload(e)}
+        />
+        <label htmlFor="image-upload" className="cursor-pointer">
+          <img src="upload-icon.png" alt="Upload Image" className="w-6 h-6 mr-4" />
+        </label>
         <input
           type="text"
           value={input}
