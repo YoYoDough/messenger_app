@@ -119,6 +119,7 @@ const ChatComponent = ({userId, userName, userImage}) => {
         <label htmlFor="image-upload" className="cursor-pointer">
           <img src="upload-icon.png" alt="Upload Image" className="w-6 h-6 mr-4" />
         </label>
+        
         <input
           type="text"
           value={input}
