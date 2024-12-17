@@ -16,7 +16,6 @@ const page = ({searchParams}) => {
     console.log(userName, userId, userImage);
 
     const getSelfId = async () => {
-  
       try {
         const response = await fetch("http://localhost:8080/api/users/self", {
           method: "POST",
@@ -46,9 +45,12 @@ const page = ({searchParams}) => {
 
     useEffect(() => {
       const fetchConversations = async() => {
-        const response = await fetch("http://localhost:8080/api/")
+        const response = await fetch(`http://localhost:8080/api/conversations/${selfId}`)
+        const data = await response.json();
+        console.log(data);
       }
-    })
+      fetchConversations()
+    }, [selfId])
 
     if (!userId || !userName || !userImage) {
       return <div>Loading...</div>; // Handle case where query params are not ready

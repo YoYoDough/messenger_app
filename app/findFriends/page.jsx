@@ -48,15 +48,11 @@ const page = () => {
         console.log(response);
         const data = await response.json();
         console.log(data);
-
-        data.map((user)=> {
-          user.email === session?.user.email ? userId = user.id: null;
-        })
         
     
         const result = data.filter((user) => {
           return (
-            user.email !== session?.user.email &&
+            user.name !== session?.user.name &&
             user.name &&
             user.name.toLowerCase().includes(input.toLowerCase())
           );
