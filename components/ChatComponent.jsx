@@ -6,51 +6,20 @@ import { io } from "socket.io-client"
 
 let socket;
 
-const ChatComponent = ({userId, userName, userImage}) => {
+const ChatComponent = ({userId, selfId, userName, userImage}) => {
   const {data: session} = useSession()
   console.log(session)
-  const selfNameProp = session?.user.name.split("#")[0];
-  const selfTagProp = "#" + session?.user.name.split("#")[1];
+  
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState("");
 
-  const [selfId, setSelfId] = useState(null);
+  
   console.log(messages);
 
   const name = userName.split("#")[0];
 
   console.log(session?.user.name);
-
-    const getSelfId = async () => {
   
-      try {
-        const response = await fetch("http://localhost:8080/api/users/self", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            name: selfNameProp,
-            tag: selfTagProp
-          }
-        )});
-  
-        if (!response.ok) {
-          console.error("Failed to fetch selfId:", response.status);
-          return;
-        }
-  
-        const data = await response.json(); // Parse JSON data
-        setSelfId(data); // Set your selfId here
-      } catch (error) {
-        console.error("Error fetching selfId:", error);
-      }
-    };
-  
-    getSelfId();
- // Dependency array only includes `selfName`
-  console.log(selfId);
-
   useEffect(() => {
     socket = io("http://localhost:8081");
     console.log(socket)
@@ -63,7 +32,7 @@ const ChatComponent = ({userId, userName, userImage}) => {
     }
   }, [])
 
-  const sendMessage = () => {
+  const sendMessage = async() => {
     if (input.trim()){
       if (socket) {
         socket.emit("sendMessage", { text: input, mySelf: session?.user.name, selfImage: session?.user.image, userId, userName }); // Pass relevant data.
