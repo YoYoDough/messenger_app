@@ -15,7 +15,14 @@ const page = ({searchParams}) => {
     const [conversations, setConversations] = useState([]);
     console.log(userName, userId, userImage);
 
+    // Fetch selfId
+  useEffect(() => {
     const getSelfId = async () => {
+      if (!selfNameProp || !selfTagProp) {
+        console.warn("Session data is missing, cannot fetch selfId.");
+        return;
+      }
+
       try {
         const response = await fetch("http://localhost:8080/api/users/self", {
           method: "POST",
@@ -24,40 +31,76 @@ const page = ({searchParams}) => {
           },
           body: JSON.stringify({
             name: selfNameProp,
-            tag: selfTagProp
-          }
-        )});
-  
+            tag: selfTagProp,
+          }),
+        });
+
         if (!response.ok) {
           console.error("Failed to fetch selfId:", response.status);
           return;
         }
-  
-        const data = await response.json(); // Parse JSON data
-        setSelfId(data); // Set your selfId here
+
+        const data = await response.json();
+        setSelfId(data);
       } catch (error) {
         console.error("Error fetching selfId:", error);
       }
     };
-  
-    getSelfId();
-    console.log(selfId)
 
-    useEffect(() => {
-      const fetchConversations = async() => {
-        const response = await fetch(`http://localhost:8080/api/conversations/${selfId}`)
+    getSelfId();
+  }, [selfNameProp, selfTagProp]);
+
+  // Fetch conversations once selfId is available
+  useEffect(() => {
+    const fetchConversations = async () => {
+      if (!selfId) return;
+
+      try {
+        const response = await fetch(`http://localhost:8080/api/conversations/${selfId}`);
+        if (!response.ok) {
+          console.error("Failed to fetch conversations");
+          return;
+        }
         const data = await response.json();
-        console.log(data);
+        setConversations(data);
+      } catch (error) {
+        console.error("Error running fetchConversations:", error);
+      } finally {
+        setIsLoading(false); // Stop loading after fetching
       }
-      fetchConversations()
-    }, [selfId])
+    };
+
+    fetchConversations();
+  }, [selfId]);
+
+
+    console.log(selfId)
+    console.log(conversations);
 
     if (!userId || !userName || !userImage) {
       return <div>Loading...</div>; // Handle case where query params are not ready
     }
 
   return (
+    <div className = "flex w-full">
+      <div className = "w-96">
+        {conversations.map((conversation) => {
+          const otherUser = conversation.user1.id === selfId ? conversation.user2 : conversation.user1;
+
+          return (
+            <div key = {conversation.id} className = "flex justify-center p-3 hover:bg-gray-200 cursor-pointer">
+              <img src = {otherUser.image || "defualtUserImg.png"} alt = {`${otherUser.name}'s Avatar'`}></img>
+              <div className = "flex">
+                <p>{otherUser.name}</p>
+                <p>{conversation.lastMessageText === "" ? "No Message Sent..." : conversation.lastMessageText}</p>
+              </div>
+            </div>
+          )
+        })}
+      </div>
+      
       <ChatComponent userId = {userId} selfId = {selfId} userName = {userName} userImage = {userImage}></ChatComponent>
+    </div>
   )
 }
 
