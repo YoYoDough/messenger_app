@@ -6,9 +6,11 @@ import { io } from "socket.io-client"
 
 let socket;
 
-const ChatComponent = ({userId, selfId, userName, userImage}) => {
+const ChatComponent = ({conversation, userId, selfId, userName, userImage}) => {
+  
   const {data: session} = useSession()
   console.log(session)
+  const [conversationId, setConversationId] = useState(2);
   
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState("");
@@ -51,11 +53,31 @@ const ChatComponent = ({userId, selfId, userName, userImage}) => {
     }
     console.log(response.ok);
     const conversation = await response.json();
+
+    if (conversation != null){
+      const response = await fetch("http://localhost:8080/api/messages", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          conversationId: conversationId,
+          senderId: selfId,
+          input: input,
+        })
+      })
+      if (!response.ok){
+        console.error("Failed to POST message...")
+      }
+      else{
+        console.log("POST request completed, ", response)
+      }
+    }
     console.log(conversation);
     if (input.trim()){
       if (socket) {
-        socket.emit("sendMessage", { conversationId: conversation.id,text: input, selfName: session?.user.name, selfImage: session?.user.image, userId, userName }); // Pass relevant data.
-        setMessages((prev) => [...prev, { conversationId: conversation.id, text: input, selfName: session?.user.name, selfImage: session?.user.image, userId, userName }]); // Update local state.
+        socket.emit("sendMessage", { conversationId: conversation.id, senderId: selfId, text: input}); // Pass relevant data.
+        setMessages((prev) => [...prev, { conversationId: conversation.id, senderId: selfId, text: input, }]); // Update local state.
         setInput(""); // Clear the input.
       } else {
         console.error("Socket not initialized!");
