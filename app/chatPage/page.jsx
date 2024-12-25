@@ -102,7 +102,7 @@ const page = ({searchParams}) => {
         })}
       </div>
       
-      <ChatComponent conversation = {conversation} userId = {userId} selfId = {selfId} userName = {userName} userImage = {userImage}></ChatComponent>
+      <ChatComponent specifiConversation = {conversation} userId = {userId} selfId = {selfId} userName = {userName} userImage = {userImage}></ChatComponent>
     </div>
   )
 }
