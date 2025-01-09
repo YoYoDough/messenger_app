@@ -11,13 +11,13 @@ const Nav = ({noNav}) => {
   const {data: session} = useSession();
   const [darkMode, setDarkMode] = useState(false);
   const [profileClicked, setProfileClicked] = useState(false);
-  const [friendRequestsCount, setFriendRequestsCount] = useState(null);
+  const [friendRequests, setFriendRequests] = useState([]);
 
   useEffect(async() => {
     const getFriendRequestCount = async() => {
       const response = await fetch(`http://localhost:8080/api/friends/count/${selfId}`)
       const data = await response.json();
-      setFriendRequestsCount(data);
+      setFriendRequests(data);
     }
   }, [])
 

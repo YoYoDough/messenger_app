@@ -8,13 +8,12 @@ import { useSession } from '@node_modules/next-auth/react';
 const page = ({searchParams}) => {
     const params = use(searchParams)
     const{data: session} = useSession();
-    const {userName, userId, userImage} = params
+    const {conversation, userName, userId, userImage} = params
     const selfNameProp = session?.user.name.split("#")[0];
     const selfTagProp = "#" + session?.user.name.split("#")[1];
     const [selfId, setSelfId] = useState(null);
     const [conversations, setConversations] = useState([]);
-    const [conversation, setConversation] = useState(null);
-    console.log(userName, userId, userImage);
+    console.log(conversation, userName, userId, userImage);
 
     // Fetch selfId
   useEffect(() => {
@@ -75,6 +74,7 @@ const page = ({searchParams}) => {
 
     console.log(selfId)
     console.log(conversations);
+    console.log(conversation)
 
     if (!userId || !userName || !userImage) {
       return <div>Loading...</div>; // Handle case where query params are not ready
@@ -102,7 +102,7 @@ const page = ({searchParams}) => {
         })}
       </div>
       
-      <ChatComponent specifiConversation = {conversation} userId = {userId} selfId = {selfId} userName = {userName} userImage = {userImage}></ChatComponent>
+      <ChatComponent conversation = {conversation} userId = {userId} selfId = {selfId} userName = {userName} userImage = {userImage}></ChatComponent>
     </div>
   )
 }

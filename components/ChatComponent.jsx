@@ -6,11 +6,11 @@ import { io } from "socket.io-client"
 
 let socket;
 
-const ChatComponent = ({specifiConversation, userId, selfId, userName, userImage}) => {
+const ChatComponent = ({conversation, userId, selfId, userName, userImage}) => {
   
   const {data: session} = useSession()
   console.log(session)
-  const [conversation, setConversation] = useState(null);
+  const [conversationId, setConversationId] = useState(2);
   
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState("");
@@ -70,7 +70,7 @@ const ChatComponent = ({specifiConversation, userId, selfId, userName, userImage
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          conversationId: conversationId,
+          conversation: specifiConversation,
           senderId: selfId,
           input: input,
         })

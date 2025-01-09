@@ -10,6 +10,9 @@ const page = () => {
     console.log(session);
     const [input, setInput] = useState(""); // Search input
     const [searchResults, setSearchResults] = useState([]); // Filtered users
+    const selfNameProp = session?.user.name.split("#")[0];
+    const selfTagProp = "#" + session?.user.name.split("#")[1];
+    const [selfId, setSelfId] = useState(null);
     const [addedFriends, setAddedFriends] = useState([]);
     const [isDisabled, setIsDisabled] = useState(false);
     const [allUsers, setAllUsers] = useState([]); // Full list of users
@@ -19,6 +22,42 @@ const page = () => {
 
     let userId;
     console.log(userId);
+
+    useEffect(() => {
+        const getSelfId = async () => {
+          if (!selfNameProp || !selfTagProp) {
+            console.warn("Session data is missing, cannot fetch selfId.");
+            return;
+          }
+    
+          try {
+            const response = await fetch("http://localhost:8080/api/users/self", {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({
+                name: selfNameProp,
+                tag: selfTagProp,
+              }),
+            });
+    
+            if (!response.ok) {
+              console.error("Failed to fetch selfId:", response.status);
+              return;
+            }
+    
+            const data = await response.json();
+            setSelfId(data);
+          } catch (error) {
+            console.error("Error fetching selfId:", error);
+          }
+        };
+    
+        getSelfId();
+      }, [selfNameProp, selfTagProp]);
+
+      console.log(selfId)
     
 
     const handleFriendAdd = async(user) => {
@@ -83,7 +122,26 @@ const page = () => {
   }, [session?.user.email]);
     console.log(addedFriends)
 
-    
+    const fetchUserHasConvo = async(selfId, userId) => {
+      const response = await fetch("http://localhost:8080/api/conversations", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          user1Id: selfId, // Replace with your user ID
+          user2Id: userId, // Replace with the recipient's user ID
+        }),
+      });
+  
+      if (!response.ok) {
+        console.error("Failed to create conversation");
+        return;
+      }
+      console.log(response.ok);
+      const conversation = await response.json();
+      return conversation;
+    }
 
 
   return (
@@ -103,7 +161,7 @@ const page = () => {
               
               <div className = "flex justify-center items-center">
                 <button title = {isDisabled === true || addedFriends.includes(user.id) ? "Friend added": "Add as a friend"} onClick = {() => handleFriendAdd(user)} className = "flex w-10 align-self-center hover:bg-gray-400 rounded-full mr-1" disabled = {addedFriends.includes(user.id) || isDisabled}><img src = "addFriend.png" alt = "Add friend image"></img></button>
-                <Link href = {{pathname: "/chatPage", query: {userId: user.id, userName: user.name, userImage: user.image}}}><button title = "Send message" onClick = {() => handleChatClick(user)} className = "flex w-10 align-self-center hover:bg-gray-400 rounded-full p-1"><img src = "sendMessage.png" alt = "Send message image"></img></button></Link>
+                <Link href = {{pathname: "/chatPage", query: {conversation: fetchUserHasConvo(selfId, user.id), userId: user.id, userName: user.name, userImage: user.image}}}><button title = "Send message" onClick = {() => handleChatClick(user)} className = "flex w-10 align-self-center hover:bg-gray-400 rounded-full p-1"><img src = "sendMessage.png" alt = "Send message image"></img></button></Link>
               </div>
             </div>
           ))}
