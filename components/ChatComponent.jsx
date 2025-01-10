@@ -6,11 +6,12 @@ import { io } from "socket.io-client"
 
 let socket;
 
-const ChatComponent = ({conversation, userId, selfId, userName, userImage}) => {
+const ChatComponent = ({clickedConversation, userId, selfId, userName, userImage}) => {
   
   const {data: session} = useSession()
   console.log(session)
-  const [conversationId, setConversationId] = useState(2);
+
+  console.log(clickedConversation)
   
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState("");
@@ -34,14 +35,10 @@ const ChatComponent = ({conversation, userId, selfId, userName, userImage}) => {
     }
   }, [])
 
-  useEffect(() => {
-    const fetchMessages = async() => {
-      const response = await fetch("http://localhost:8080/api/conversations");
-      const data = await response.json();
-      setMessages(data);
-    }
-    fetchMessages()
-  }) 
+
+  //Need to fetch previous messages next...
+
+  
 
   const sendMessage = async() => {
     // Step 1: Create or get the conversation
@@ -62,6 +59,7 @@ const ChatComponent = ({conversation, userId, selfId, userName, userImage}) => {
     }
     console.log(response.ok);
     const conversation = await response.json();
+    console.log(conversation)
 
     if (conversation != null){
       const response = await fetch("http://localhost:8080/api/messages", {
@@ -70,7 +68,7 @@ const ChatComponent = ({conversation, userId, selfId, userName, userImage}) => {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          conversation: specifiConversation,
+          conversationId: conversation.id,
           senderId: selfId,
           input: input,
         })
@@ -85,8 +83,8 @@ const ChatComponent = ({conversation, userId, selfId, userName, userImage}) => {
     console.log(conversation);
     if (input.trim()){
       if (socket) {
-        socket.emit("sendMessage", { conversation: specifiConversation, senderId: selfId, text: input}); // Pass relevant data.
-        setMessages((prev) => [...prev, { conversation: specifiConversation, senderId: selfId, text: input, }]); // Update local state.
+        socket.emit("sendMessage", { conversationId: conversation.id, senderId: selfId, text: input}); // Pass relevant data.
+        setMessages((prev) => [...prev, { conversationId: conversation.id, senderId: selfId, text: input, }]); // Update local state.
         setInput(""); // Clear the input.
       } else {
         console.error("Socket not initialized!");

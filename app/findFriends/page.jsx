@@ -161,7 +161,7 @@ const page = () => {
               
               <div className = "flex justify-center items-center">
                 <button title = {isDisabled === true || addedFriends.includes(user.id) ? "Friend added": "Add as a friend"} onClick = {() => handleFriendAdd(user)} className = "flex w-10 align-self-center hover:bg-gray-400 rounded-full mr-1" disabled = {addedFriends.includes(user.id) || isDisabled}><img src = "addFriend.png" alt = "Add friend image"></img></button>
-                <Link href = {{pathname: "/chatPage", query: {conversation: fetchUserHasConvo(selfId, user.id), userId: user.id, userName: user.name, userImage: user.image}}}><button title = "Send message" onClick = {() => handleChatClick(user)} className = "flex w-10 align-self-center hover:bg-gray-400 rounded-full p-1"><img src = "sendMessage.png" alt = "Send message image"></img></button></Link>
+                <Link href = {{pathname: "/chatPage", query: {userId: user.id, userName: user.name, userImage: user.image}}}><button title = "Send message" onClick = {() => handleChatClick(user)} className = "flex w-10 align-self-center hover:bg-gray-400 rounded-full p-1"><img src = "sendMessage.png" alt = "Send message image"></img></button></Link>
               </div>
             </div>
           ))}
