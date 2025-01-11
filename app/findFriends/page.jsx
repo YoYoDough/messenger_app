@@ -122,26 +122,7 @@ const page = () => {
   }, [session?.user.email]);
     console.log(addedFriends)
 
-    const fetchUserHasConvo = async(selfId, userId) => {
-      const response = await fetch("http://localhost:8080/api/conversations", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          user1Id: selfId, // Replace with your user ID
-          user2Id: userId, // Replace with the recipient's user ID
-        }),
-      });
-  
-      if (!response.ok) {
-        console.error("Failed to create conversation");
-        return;
-      }
-      console.log(response.ok);
-      const conversation = await response.json();
-      return conversation;
-    }
+    
 
 
   return (
@@ -161,7 +142,7 @@ const page = () => {
               
               <div className = "flex justify-center items-center">
                 <button title = {isDisabled === true || addedFriends.includes(user.id) ? "Friend added": "Add as a friend"} onClick = {() => handleFriendAdd(user)} className = "flex w-10 align-self-center hover:bg-gray-400 rounded-full mr-1" disabled = {addedFriends.includes(user.id) || isDisabled}><img src = "addFriend.png" alt = "Add friend image"></img></button>
-                <Link href = {{pathname: "/chatPage", query: {userId: user.id, userName: user.name, userImage: user.image}}}><button title = "Send message" onClick = {() => handleChatClick(user)} className = "flex w-10 align-self-center hover:bg-gray-400 rounded-full p-1"><img src = "sendMessage.png" alt = "Send message image"></img></button></Link>
+                <Link href = {{pathname: "/chatPage", query: {userId: user.id, userName: user.name, userImage: user.image}}}><button title = "Send message" className = "flex w-10 align-self-center hover:bg-gray-400 rounded-full p-1"><img src = "sendMessage.png" alt = "Send message image"></img></button></Link>
               </div>
             </div>
           ))}

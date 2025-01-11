@@ -36,7 +36,7 @@ const ChatComponent = ({clickedConversation, userId, selfId, userName, userImage
   }, [])
 
   //Also want to add a useEffect that will fetch for the conversation on load if it has it already
-
+  console.log(clickedConversation)
 
   //Need to fetch previous messages next...
 

@@ -51,6 +51,31 @@ const page = ({searchParams}) => {
     getSelfId();
   }, [selfNameProp, selfTagProp]);
 
+  useEffect(()=> {
+    const fetchUserHasConvo = async() => {
+      const response = await fetch("http://localhost:8080/api/conversations/getconvo", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          user1Id: selfId, // Replace with your user ID
+          user2Id: userId, // Replace with the recipient's user ID
+        }),
+      });
+  
+      if (!response.ok) {
+        console.error("Failed to create conversation");
+        return;
+      }
+      console.log(response.ok);
+      const conversation = await response.json();
+      setConversation(conversation);
+      return conversation;
+    }
+    fetchUserHasConvo()
+  }, [selfId])
+
   // Fetch conversations once selfId is available
   useEffect(() => {
     const fetchConversations = async () => {
