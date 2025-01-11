@@ -6,12 +6,12 @@ import { io } from "socket.io-client"
 
 let socket;
 
-const ChatComponent = ({clickedConversation, userId, selfId, userName, userImage}) => {
+const ChatComponent = ({conversation, setConversation, setConversations, userId, selfId, userName, userImage}) => {
   
   const {data: session} = useSession()
   console.log(session)
 
-  console.log(clickedConversation)
+  console.log(conversation)
   
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState("");
@@ -35,33 +35,42 @@ const ChatComponent = ({clickedConversation, userId, selfId, userName, userImage
     }
   }, [])
 
-  //Also want to add a useEffect that will fetch for the conversation on load if it has it already
-  console.log(clickedConversation)
-
   //Need to fetch previous messages next...
+  useEffect(() => {
+    const fetchMessages = async() => {
+      const response = await fetch(`http://localhost:8080/api/messages/withconvo?conversationid=${conversation.id}`)
+      const data = await response.json();
+      setMessages(data);
+    }
+    fetchMessages();
+  }, [conversation])
 
+  console.log(messages);
   
 
-  const sendMessage = async() => {
-    // Step 1: Create or get the conversation
-    const response = await fetch("http://localhost:8080/api/conversations", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        user1Id: selfId, // Replace with your user ID
-        user2Id: userId, // Replace with the recipient's user ID
-      }),
-    });
-
-    if (!response.ok) {
-      console.error("Failed to create conversation");
-      return;
+  const sendMessage = async(conversation) => {
+    // Step 1: Create the conversation if there is none fetched in the first place
+    if (conversation == null){
+      const response = await fetch("http://localhost:8080/api/conversations", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          user1Id: selfId, // Replace with your user ID
+          user2Id: userId, // Replace with the recipient's user ID
+        }),
+      });
+  
+      if (!response.ok) {
+        console.error("Failed to create conversation");
+        return;
+      }
+      console.log(response.ok);
+      const newConversation = await response.json();
+      console.log(conversation)
+      setConversation(newConversation);
     }
-    console.log(response.ok);
-    const conversation = await response.json();
-    console.log(conversation)
 
     if (conversation != null){
       const response = await fetch("http://localhost:8080/api/messages", {
@@ -83,10 +92,15 @@ const ChatComponent = ({clickedConversation, userId, selfId, userName, userImage
       }
     }
     console.log(conversation);
+    setConversations((conversations) => 
+      conversations.map((currentConversation) => 
+        currentConversation.id === conversation.id ? {...currentConversation, lastMessageText: messages[messages.length-1].content} : currentConversation
+      )
+    )
     if (input.trim()){
       if (socket) {
-        socket.emit("sendMessage", { conversationId: conversation.id, senderId: selfId, text: input}); // Pass relevant data.
-        setMessages((prev) => [...prev, { conversationId: conversation.id, senderId: selfId, text: input, }]); // Update local state.
+        socket.emit("sendMessage", { conversation: conversation, senderId: selfId, content: input}); // Pass relevant data.
+        setMessages((prev) => [...prev, { conversation: conversation, senderId: selfId, content: input, }]); // Update local state.
         setInput(""); // Clear the input.
       } else {
         console.error("Socket not initialized!");
@@ -119,7 +133,7 @@ const ChatComponent = ({clickedConversation, userId, selfId, userName, userImage
               } break-words`}
             >
               
-              {msg.text}
+              {msg.content}
           </div>
           </div>
           );
@@ -142,7 +156,7 @@ const ChatComponent = ({clickedConversation, userId, selfId, userName, userImage
         <input
           type="text"
           value={input}
-          onKeyDown={(e) => {if (e.key === "Enter") sendMessage()}}
+          onKeyDown={(e) => {if (e.key === "Enter") sendMessage(conversation)}}
           onChange={(e) => setInput(e.target.value)}
           className="flex-1 p-2 rounded-md outline-none bg-black bg-opacity-50 text-white placeholder-gray-200"
           placeholder={`Message @${name}`}

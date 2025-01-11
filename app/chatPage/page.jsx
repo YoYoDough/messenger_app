@@ -14,6 +14,7 @@ const page = ({searchParams}) => {
     const [selfId, setSelfId] = useState(null);
     const [conversations, setConversations] = useState([]);
     const [conversation, setConversation] = useState(null);
+    const [lastMessage, setLastMessage] = useState(null);
     console.log(conversation, userName, userId, userImage);
 
     // Fetch selfId
@@ -128,7 +129,7 @@ const page = ({searchParams}) => {
         })}
       </div>
       
-      <ChatComponent clickedConversation = {conversation} userId = {userId} selfId = {selfId} userName = {userName} userImage = {userImage}></ChatComponent>
+      <ChatComponent conversation = {conversation} setConversation = {setConversation} setConversations = {setConversations} userId = {userId} selfId = {selfId} userName = {userName} userImage = {userImage}></ChatComponent>
     </div>
   )
 }
