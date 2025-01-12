@@ -17,6 +17,7 @@ const ChatComponent = ({conversation, setConversation, setConversations, userId,
   const [input, setInput] = useState("");
 
   
+  
   console.log(messages);
 
   const name = userName.split("#")[0];
@@ -92,20 +93,29 @@ const ChatComponent = ({conversation, setConversation, setConversations, userId,
       }
     }
     console.log(conversation);
-    setConversations((conversations) => 
-      conversations.map((currentConversation) => 
-        currentConversation.id === conversation.id ? {...currentConversation, lastMessageText: messages[messages.length-1].content} : currentConversation
-      )
-    )
+    
     if (input.trim()){
       if (socket) {
         socket.emit("sendMessage", { conversation: conversation, senderId: selfId, content: input}); // Pass relevant data.
         setMessages((prev) => [...prev, { conversation: conversation, senderId: selfId, content: input, }]); // Update local state.
+        setConversations((conversations) => {
+          const updatedConversations = conversations.map((currentConversation) =>
+            currentConversation.conversationId === conversation.id
+              ? { ...currentConversation, lastMessageText: input }
+              : currentConversation
+          );
+          console.log("Updated Conversations:", updatedConversations);
+          return updatedConversations;
+        })
+        console.log()
         setInput(""); // Clear the input.
       } else {
         console.error("Socket not initialized!");
       }
+
     }
+    
+    
   }
 
 
