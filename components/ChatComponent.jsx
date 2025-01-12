@@ -126,19 +126,19 @@ const ChatComponent = ({conversation, setConversation, setConversations, userId,
       <div key = {userId} className="flex-1 flex flex-col gap-2 overflow-y-auto p-4">
         {messages.map((msg, index) => {
           const showProfile = index === 0 || new Date(msg.timestamp) - new Date(messages[index - 1].timestamp) > 2 * 60 * 1000 ||messages[index - 1].userId !== msg.userId;
+          const userConnectedToSender = msg.senderId === msg.conversation.user1.id ? msg.conversation.user1 : msg.conversation.user2
           return(
           <div>
-            { showProfile &&
+            
               <div className = "flex items-center mb-2">
-                <img className = "w-10" src = {msg.selfImage}></img>
-                <p>{msg.mySelf}</p>
-                {}
+                <img className = "w-12" src = {userConnectedToSender.image}></img>
+                <p className = "flex">{userConnectedToSender.name.split("#")[0]} {msg.sentAt}</p>
               </div>
-            }
+            
             
             <div
               key={index}
-              className={`inline-block w-fit max-w-[80%] p-3 rounded-md mb-2 ${
+              className={`inline-block w-fit max-w-[80%] p-3 rounded-md mb-1 ${
                 msg.userId === selfId ? "bg-gray-300 self-end" : "bg-blue-500 text-white"
               } break-words`}
             >

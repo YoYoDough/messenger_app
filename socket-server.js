@@ -2,7 +2,7 @@ const { Server } = require("socket.io");
 
 const io = new Server(8081, {
     cors: {
-        origin: "http://localhost:3000", // Adjust for your Next.js frontend
+        origin: "http://localhost:3000", // Adjusted for my Next.js port
         methods: ["GET", "POST"],
     },
 });
