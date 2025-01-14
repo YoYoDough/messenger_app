@@ -27,7 +27,7 @@ const ChatComponent = ({conversation, setConversation, setConversations, userId,
   useEffect(() => {
     socket = io("http://localhost:8081");
     console.log(socket)
-    socket.on("receiveMessages", (message) => {
+    socket.on("receiveMessage", (message) => {
       setMessages((prev)=> [...prev, message]);
     })
 
@@ -39,12 +39,15 @@ const ChatComponent = ({conversation, setConversation, setConversations, userId,
   //Need to fetch previous messages next...
   useEffect(() => {
     const fetchMessages = async() => {
+      if (messages == null){
+        return;
+      }
       const response = await fetch(`http://localhost:8080/api/messages/withconvo?conversationid=${conversation.id}`)
       const data = await response.json();
       setMessages(data);
     }
     fetchMessages();
-  }, [conversation])
+  }, [conversation, messages])
 
   console.log(messages);
   
@@ -139,7 +142,7 @@ const ChatComponent = ({conversation, setConversation, setConversations, userId,
             <div
               key={index}
               className={`inline-block w-fit max-w-[80%] p-3 rounded-md mb-1 ${
-                msg.userId === selfId ? "bg-gray-300 self-end" : "bg-blue-500 text-white"
+                msg.senderId !== selfId ? "bg-gray-300 self-end" : "bg-blue-500 text-white"
               } break-words`}
             >
               

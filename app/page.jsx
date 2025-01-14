@@ -18,7 +18,6 @@ export default function Home() {
     }
   }, [])
 
-  console.log(session)
   
   return (
     <div className = "flex flex-col">

@@ -75,6 +75,10 @@ const handler = NextAuth({
               if (!response.ok) {
                 throw new Error('Failed to save Google user data to backend');
               }
+              if (response.ok){
+                userDataResponse = await response.json();
+                user.name = userDataResponse.name;
+              }
             }
           } 
           // Return true if everything is successful
@@ -88,9 +92,7 @@ const handler = NextAuth({
 
       async session({ session, user }) {
         // Attach more user data to the session
-        if (user) {
-          session.user.username = user.name;  // Add username to session
-        }
+        
         return session;
       },
     },
