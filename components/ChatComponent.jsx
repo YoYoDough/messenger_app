@@ -38,7 +38,10 @@ const ChatComponent = ({conversation, setConversation, setConversations, userId,
 
   //Need to fetch previous messages next...
   useEffect(() => {
-    const fetchMessages = async() => {
+    async function fetchMessages() {
+      if (conversation !== null && !conversation.id){
+        return;
+      }
       if (messages == null){
         return;
       }
