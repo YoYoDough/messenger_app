@@ -15,7 +15,7 @@ const page = ({searchParams}) => {
     const selfTagProp = "#" + session?.user.name.split("#")[1];
     const [selfId, setSelfId] = useState(null);
     const [conversations, setConversations] = useState([]);
-    const [conversation, setConversation] = useState(conversations[0]);
+    const [conversation, setConversation] = useState();
     const [lastMessage, setLastMessage] = useState(null);
     console.log(conversation, userName, userId, userImage);
 
@@ -62,6 +62,11 @@ const page = ({searchParams}) => {
     }
     else if (conversations.length > 0){
       const latestConversation = conversations[0];
+      const { lastMessageText, lastMessageSentAt, conversationId, ...rest } = latestConversation;
+      setConversation({
+        ...rest,
+        id: conversationId,
+      })
       if (latestConversation.user1.id === selfId){
         setUserId(latestConversation.user2.id);
         setUserName(latestConversation.user2.name);
@@ -73,7 +78,7 @@ const page = ({searchParams}) => {
         setUserImage(latestConversation.user1.image);
       }
     }
-  })
+  }, [params, selfId, conversations])
 
   useEffect(()=> {
     const fetchUserHasConvo = async() => {
@@ -89,7 +94,7 @@ const page = ({searchParams}) => {
       });
   
       if (!response.ok) {
-        console.error("Failed to create conversation");
+        console.log("Failed to create conversation");
         return;
       }
       console.log(response.ok);
@@ -127,7 +132,12 @@ const page = ({searchParams}) => {
     console.log(conversation)
 
     const handleConversationClick = (conversation) => {
-      setConversation(conversation)
+      const { lastMessageText, lastMessageSentAt, conversationId, ...rest } = conversation; // Exclude properties
+      const filteredConversation = {
+        ...rest,
+        id: conversationId,
+      }
+      setConversation(filteredConversation)
     }
 
   return (

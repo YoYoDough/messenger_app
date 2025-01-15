@@ -126,7 +126,7 @@ const ChatComponent = ({conversation, setConversation, setConversations, userId,
     <div className = "flex flex-col w-full h-screen">
       <ChatNav userName = {userName} userImage = {userImage}></ChatNav>
       {/* Messages Area */}
-      <div key = {userId} className="flex-1 flex flex-col gap-2 overflow-y-auto p-4">
+      <div className="flex-1 flex flex-col gap-2 overflow-y-auto p-4">
         {messages.map((msg, index) => {
           const showProfile = index === 0 || new Date(msg.timestamp) - new Date(messages[index - 1].timestamp) > 2 * 60 * 1000 ||messages[index - 1].userId !== msg.userId;
           const userConnectedToSender = msg.senderId === msg.conversation.user1.id ? msg.conversation.user1 : msg.conversation.user2
