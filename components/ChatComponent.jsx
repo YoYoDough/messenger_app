@@ -47,7 +47,7 @@ const ChatComponent = ({conversation, setConversation, setConversations, userId,
       setMessages(data);
     }
     fetchMessages();
-  }, [conversation, messages])
+  }, [conversation])
 
   console.log(messages);
   
@@ -141,7 +141,7 @@ const ChatComponent = ({conversation, setConversation, setConversations, userId,
             
             <div
               key={index}
-              className={`inline-block w-fit max-w-[80%] p-3 rounded-md mb-1 ${
+              className={`inline-block w-fit max-w-[80%] p-3 rounded-md mb-1 text-black ${
                 msg.senderId !== selfId ? "bg-gray-300 self-end" : "bg-blue-500 text-white"
               } break-words`}
             >

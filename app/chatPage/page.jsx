@@ -8,12 +8,14 @@ import { useSession } from '@node_modules/next-auth/react';
 const page = ({searchParams}) => {
     const params = use(searchParams)
     const{data: session} = useSession();
-    const { userName, userId, userImage } = params
+    const [userName, setUserName] = useState("");
+    const [userId, setUserId] = useState(null);
+    const [userImage, setUserImage] = useState("");
     const selfNameProp = session?.user.name.split("#")[0];
     const selfTagProp = "#" + session?.user.name.split("#")[1];
     const [selfId, setSelfId] = useState(null);
     const [conversations, setConversations] = useState([]);
-    const [conversation, setConversation] = useState(null);
+    const [conversation, setConversation] = useState(conversations[0]);
     const [lastMessage, setLastMessage] = useState(null);
     console.log(conversation, userName, userId, userImage);
 
@@ -51,6 +53,27 @@ const page = ({searchParams}) => {
 
     getSelfId();
   }, [selfNameProp, selfTagProp]);
+
+  useEffect(() => {
+    if (params.userName && params.userId && params.userImage){
+      setUserName(params.userName);
+      setUserId(params.userId)
+      setUserImage(params.userImage);
+    }
+    else if (conversations.length > 0){
+      const latestConversation = conversations[0];
+      if (latestConversation.user1.id === selfId){
+        setUserId(latestConversation.user2.id);
+        setUserName(latestConversation.user2.name);
+        setUserImage(latestConversation.user2.image);
+      }
+      else{
+        setUserId(latestConversation.user1.id);
+        setUserName(latestConversation.user1.name);
+        setUserImage(latestConversation.user1.image);
+      }
+    }
+  })
 
   useEffect(()=> {
     const fetchUserHasConvo = async() => {
@@ -102,10 +125,6 @@ const page = ({searchParams}) => {
     console.log(selfId)
     console.log(conversations);
     console.log(conversation)
-
-    if (!userId || !userName || !userImage) {
-      return <div>Loading...</div>; // Handle case where query params are not ready
-    }
 
     const handleConversationClick = (conversation) => {
       setConversation(conversation)
