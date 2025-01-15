@@ -1,7 +1,7 @@
 "use client"
 import { useSession } from "next-auth/react";
 import ChatNav from "./ChatNav"
-import {useState, useEffect } from 'react'
+import {useState, useEffect, useRef } from 'react'
 import { io } from "socket.io-client"
 
 let socket;
@@ -16,7 +16,7 @@ const ChatComponent = ({conversation, setConversation, setConversations, userId,
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState("");
 
-  
+  const bottomOfChat = useRef(null);
   
   console.log(messages);
 
@@ -53,6 +53,10 @@ const ChatComponent = ({conversation, setConversation, setConversations, userId,
   }, [conversation])
 
   console.log(messages);
+
+  useEffect(() => {
+      bottomOfChat.current?.scrollIntoView({ behavior: 'smooth' }); // Scroll smoothly to the bottom of messages on page load
+  }, [messages]);
   
 
   const sendMessage = async(conversation) => {
@@ -150,10 +154,12 @@ const ChatComponent = ({conversation, setConversation, setConversations, userId,
             >
               
               {msg.content}
-          </div>
+            </div>
           </div>
           );
         })}
+
+        <div ref={bottomOfChat} /> {/* For useRef to automatically scroll to the bottom for recent messages on each render */}
       </div>
       
       {/* Input Area */}

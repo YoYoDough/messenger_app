@@ -12,11 +12,12 @@ export default function Home() {
 
   useEffect(()=>{
     const fetchConversations = async() =>{
-      const response = await fetch(`http://localhost:8080/api/messages/conversations?email=${session?.user.email}`);
+      const response = await fetch(`http://localhost:8080/api/messages/conversations?email=${session?.user.name}`);
       const data = await response.json();
       setConversations(data);
     }
-  }, [])
+    fetchConversations
+  }, [session?.user?.name])
 
   
   return (
@@ -27,15 +28,7 @@ export default function Home() {
             <h1 className = "head_text">Get started creating messages!</h1>
             <p>Get started by making friends <Link className = "block mt-5 underline-offset-4 hover:underline md:inline-block dark:hover:text-neutral-300  dark:text-neutral-300" href = "/findFriends"><b>here</b></Link></p>
           </>}
-          {conversations.map((convo) => (
-            <div className = "flex">
-              <img src = {conversations.receiverImg}></img>
-              <div className = "flex flex-col">
-                <h3></h3>
-                <p></p>
-              </div>
-            </div>
-          ))}
+          
         </div>}
     </div>
   );
