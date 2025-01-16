@@ -3,13 +3,12 @@ import "@styles/globals.css";
 import Provider from "@components/Provider"
 import Nav from "@components/Nav"
 import { usePathname } from "next/navigation";
-
-
+import SelfIdProvider from "@components/SelfIdProvider";
 
 export const RootLayout = ({ children }) => {
   const pathname = usePathname();
   const hidenav = pathname === "/login" || pathname === "/signUp"
-  
+
   return (
     <html lang="en">
       <head>
@@ -17,12 +16,12 @@ export const RootLayout = ({ children }) => {
       </head>
       <body>
         <Provider>
-
-          <main className = "flex h-screen">
-            {!hidenav && <Nav/>}
-            {children}
-          </main>
-          
+          <SelfIdProvider> 
+            <main className="flex h-screen">
+              {!hidenav && <Nav />}
+              {children}
+            </main>
+          </SelfIdProvider>
         </Provider>
       </body>
     </html>

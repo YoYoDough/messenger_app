@@ -1,58 +1,24 @@
 "use client"
 import { useRouter } from 'next/navigation';
-import { use, useEffect, useState } from 'react';
+import { use, useContext, useEffect, useState } from 'react';
 import ChatComponent from "@components/ChatComponent";
 import React from 'react'
+import { useSelfId } from '@components/SelfIdProvider'
 import { useSession } from '@node_modules/next-auth/react';
 
 const page = ({searchParams}) => {
     const params = use(searchParams)
-    const{data: session} = useSession();
     const [userName, setUserName] = useState("");
     const [userId, setUserId] = useState(null);
     const [userImage, setUserImage] = useState("");
-    const selfNameProp = session?.user.name.split("#")[0];
-    const selfTagProp = "#" + session?.user.name.split("#")[1];
-    const [selfId, setSelfId] = useState(null);
+
+    const { selfId } = useSelfId() //get global state variable for one's own id in SelfIdProvider
+
     const [conversations, setConversations] = useState([]);
     const [conversation, setConversation] = useState();
-    const [lastMessage, setLastMessage] = useState(null);
+
     console.log(conversation, userName, userId, userImage);
 
-    // Fetch selfId
-  useEffect(() => {
-    const getSelfId = async () => {
-      if (!selfNameProp || !selfTagProp) {
-        console.warn("Session data is missing, cannot fetch selfId.");
-        return;
-      }
-
-      try {
-        const response = await fetch("http://localhost:8080/api/users/self", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            name: selfNameProp,
-            tag: selfTagProp,
-          }),
-        });
-
-        if (!response.ok) {
-          console.error("Failed to fetch selfId:", response.status);
-          return;
-        }
-
-        const data = await response.json();
-        setSelfId(data);
-      } catch (error) {
-        console.error("Error fetching selfId:", error);
-      }
-    };
-
-    getSelfId();
-  }, [selfNameProp, selfTagProp]);
 
   useEffect(() => {
     if (params.userName && params.userId && params.userImage){
@@ -78,10 +44,13 @@ const page = ({searchParams}) => {
         setUserImage(latestConversation.user1.image);
       }
     }
-  }, [params, selfId, conversations])
+  }, [params, conversations])
 
   useEffect(()=> {
     const fetchUserHasConvo = async() => {
+      if (!selfId || !userId){
+        return;
+      }
       const response = await fetch("http://localhost:8080/api/conversations/getconvo", {
         method: "POST",
         headers: {
@@ -103,7 +72,7 @@ const page = ({searchParams}) => {
       return conversation;
     }
     fetchUserHasConvo()
-  }, [selfId])
+  }, [selfId, userId])
 
   // Fetch conversations once selfId is available
   useEffect(() => {

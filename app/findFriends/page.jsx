@@ -1,8 +1,9 @@
 "use client"
-import { useEffect, useState } from "react"
+import { useEffect, useState, useContext } from "react"
 import { useSession } from "next-auth/react";
-
+import { useSelfId } from '@components/SelfIdProvider'
 import Link from "next/link";
+import { Context } from "@app/layout";
 
 
 const page = () => {
@@ -12,7 +13,7 @@ const page = () => {
     const [searchResults, setSearchResults] = useState([]); // Filtered users
     const selfNameProp = session?.user.name.split("#")[0];
     const selfTagProp = "#" + session?.user.name.split("#")[1];
-    const [selfId, setSelfId] = useState(null);
+    const {selfId, setSelfId} = useSelfId();
     const [addedFriends, setAddedFriends] = useState([]);
     const [isDisabled, setIsDisabled] = useState(false);
     const [allUsers, setAllUsers] = useState([]); // Full list of users
@@ -23,41 +24,7 @@ const page = () => {
     let userId;
     console.log(userId);
 
-    useEffect(() => {
-        const getSelfId = async () => {
-          if (!selfNameProp || !selfTagProp) {
-            console.warn("Session data is missing, cannot fetch selfId.");
-            return;
-          }
-    
-          try {
-            const response = await fetch("http://localhost:8080/api/users/self", {
-              method: "POST",
-              headers: {
-                "Content-Type": "application/json",
-              },
-              body: JSON.stringify({
-                name: selfNameProp,
-                tag: selfTagProp,
-              }),
-            });
-    
-            if (!response.ok) {
-              console.error("Failed to fetch selfId:", response.status);
-              return;
-            }
-    
-            const data = await response.json();
-            setSelfId(data);
-          } catch (error) {
-            console.error("Error fetching selfId:", error);
-          }
-        };
-    
-        getSelfId();
-      }, [selfNameProp, selfTagProp]);
-
-      console.log(selfId)
+    console.log(selfId)
     
 
     const handleFriendAdd = async(user) => {
