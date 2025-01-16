@@ -111,7 +111,7 @@ const ChatComponent = ({conversation, setConversation, setConversations, userId,
         setConversations((conversations) => {
           const updatedConversations = conversations.map((currentConversation) =>
             currentConversation.conversationId === conversation.id
-              ? { ...currentConversation, lastMessageText: input }
+              ? { ...currentConversation, lastMessageText: input}
               : currentConversation
           );
           console.log("Updated Conversations:", updatedConversations);

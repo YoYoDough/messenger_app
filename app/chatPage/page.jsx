@@ -28,7 +28,7 @@ const page = ({searchParams}) => {
     }
     else if (conversations.length > 0){
       const latestConversation = conversations[0];
-      const { lastMessageText, lastMessageSentAt, conversationId, ...rest } = latestConversation;
+      const { lastMessageText, lastMessageSentAt, conversationId, senderId, ...rest } = latestConversation;
       setConversation({
         ...rest,
         id: conversationId,
@@ -101,7 +101,7 @@ const page = ({searchParams}) => {
     console.log(conversation)
 
     const handleConversationClick = (conversation) => {
-      const { lastMessageText, lastMessageSentAt, conversationId, ...rest } = conversation; // Exclude properties
+      const { lastMessageText, lastMessageSentAt, conversationId, senderId, ...rest } = conversation; // Exclude properties
       const filteredConversation = {
         ...rest,
         id: conversationId,
@@ -116,11 +116,19 @@ const page = ({searchParams}) => {
           const otherUser = conversation.user1.id === selfId ? conversation.user2 : conversation.user1;
 
           return (
-            <div key = {conversation.id} className = "flex justify-center p-3 hover:bg-gray-200 cursor-pointer" onClick = {() => handleConversationClick(conversation)}>
-              <img src = {otherUser.image || "defualtUserImg.png"} alt = {`${otherUser.name}'s Avatar'`}></img>
-              <div className = "flex">
+            <div key = {conversation.id} className = "flex flex-col justify-center p-3 hover:bg-gray-400 cursor-pointer" onClick = {() => handleConversationClick(conversation)}>
+              <div className = "flex items-center">
+                <img className = "w-12 rounded-full mr-4" src = {otherUser.image || "defualtUserImg.png"} alt = {`${otherUser.name}'s Avatar'`}></img>
                 <p>{otherUser.name}</p>
-                <p>{conversation.lastMessageText === "" ? "No Message Sent..." : conversation.lastMessageText}</p>
+              </div>
+              
+              <div className = "flex mt-3 items-center p-1">
+                {conversation.senderId === selfId && conversation.lastMessageText !== "" 
+                  ? `You: ${conversation.lastMessageText}` 
+                  : conversation.user1.id !== selfId 
+                    ? `${conversation.user1.name}: ${conversation.lastMessageText}`
+                    : `${conversation.user2.name}: ${conversation.lastMessageText}`
+                }
               </div>
             </div>
           )
