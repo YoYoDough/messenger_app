@@ -78,7 +78,12 @@ const handler = NextAuth({
               if (response.ok){
                 userDataResponse = await response.json();
                 user.name = userDataResponse.name;
+                console.log("User Data Response: ", userDataResponse)
               }
+            }
+            else{
+              const userExistsDataResponse = await userExistsResponse.json();
+              user.name = userExistsDataResponse.name;
             }
           } 
           // Return true if everything is successful
@@ -92,7 +97,9 @@ const handler = NextAuth({
 
       async session({ session, user }) {
         // Attach more user data to the session
-        
+        if (user) {
+          session.user.username = user.name;  // Add username to session
+        }
         return session;
       },
     },
