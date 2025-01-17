@@ -6,20 +6,25 @@ import { faMoon, faSun } from "@fortawesome/free-solid-svg-icons";
 import { useSession } from "next-auth/react";
 import Dropdown from "@components/Dropdown";
 import NavButtons from "./NavButtons";
+import { useSelfId } from "./SelfIdProvider";
 
 const Nav = ({noNav}) => {
   const {data: session} = useSession();
   const [darkMode, setDarkMode] = useState(false);
   const [profileClicked, setProfileClicked] = useState(false);
   const [friendRequests, setFriendRequests] = useState([]);
+  const { selfId } = useSelfId()
 
-  useEffect(async() => {
-    const getFriendRequestCount = async() => {
-      const response = await fetch(`http://localhost:8080/api/friends/count/${selfId}`)
+  useEffect(() => {
+    const getFriendRequestCount = async () => {
+      if (!selfId) return; // Ensure selfId is available before making the fetch request
+      const response = await fetch(`http://localhost:8080/api/friends/count/${selfId}`);
       const data = await response.json();
       setFriendRequests(data);
-    }
-  }, [])
+    };
+
+    getFriendRequestCount(); // Call the function to get the friend requests count
+  }, [selfId])
 
   const toggleDarkMode = () => {
     setDarkMode(!darkMode);
@@ -38,6 +43,10 @@ const Nav = ({noNav}) => {
     setProfileClicked(!profileClicked);
   }
 
+  if (noNav){
+    return null;
+  }
+
   return (
     <div className={darkMode ? "dark" : ""}>
       <nav className={`navbar flex flex-col justify-content-start h-screen shadow nav ${darkMode ? "dark" : ""}`}>
@@ -50,7 +59,6 @@ const Nav = ({noNav}) => {
             <NavButtons title = "Messages" hrefLink = "/chatPage" src = "messageIcon.png" alt = "Messages Icon"/>
             <NavButtons title = "Find Friends" hrefLink = "/findFriends" src = "friends.png" alt = "Friends Icon"/>
             <NavButtons title = "Groups" hrefLink = "/groups" src = "groupIcon.png" alt = "Groups Icon"/>
-
           </div>
         )}
 

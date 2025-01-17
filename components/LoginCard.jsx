@@ -3,11 +3,20 @@ import Link from "next/link"
 import { useState, useEffect } from 'react'
 import { useSession, signIn, getProviders, authorize } from "next-auth/react"
 import { useRouter } from 'next/navigation';
+import { usePathname } from "next/navigation";
 
 const LoginCard = () => {
-    const {data: session} = useSession();
+    const {data: session, status } = useSession();
     const [providers, setProviders] = useState(null);
     const router = useRouter();
+
+    useEffect(() => {
+        if (status === 'authenticated') {
+          // Redirect to the homepage after successful sign-in
+          router.push('/'); // Change '/home' to the appropriate path
+        }
+        
+      }, [status, session, router]);
 
     const [userData, setUserData] = useState({
         email: "",
@@ -24,10 +33,15 @@ const LoginCard = () => {
 
     useEffect(() => {
         const setUpProviders = async () => {
-          const response = await getProviders();
-          setProviders(response);
-        };
-        setUpProviders();
+            try {
+              const response = await getProviders();
+              setProviders(response);
+            } catch (error) {
+              console.error('Error fetching providers:', error);
+            }
+          };
+      
+          setUpProviders();
       }, []);
 
       console.log(providers);
@@ -56,6 +70,11 @@ const LoginCard = () => {
             console.log("error logging in...")
         }
       }
+
+        // Handle loading state (session is being fetched)
+        if (status === 'loading') {
+            return <p>Loading...</p>; // Show loading text while the session is being fetched
+        }
   return (
     <div className = "flex flex-col shadow p-10 w-200">
         <h1 className = "font-poppins font-bold text-lg">Login to your Account</h1>

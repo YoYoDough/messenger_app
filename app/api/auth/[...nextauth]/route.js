@@ -79,6 +79,7 @@ const handler = NextAuth({
                 userDataResponse = await response.json();
                 user.name = userDataResponse.name;
                 console.log("User Data Response: ", userDataResponse)
+                
               }
             }
             else{

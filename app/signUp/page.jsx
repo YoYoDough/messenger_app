@@ -42,7 +42,7 @@ const page = () => {
           
           if (checkUserRes.status === 404) {
               // If the user doesn't exist, proceed to create the user
-              const res = await fetch("http://localhost:8080/api/users", {
+              const res = await fetch("http://localhost:8080/api/users/add", {
                   method: "POST",
                   headers: { "Content-Type": "application/json" },
                   body: JSON.stringify(userData),
