@@ -1,16 +1,16 @@
 "use client"
-import { useRouter } from 'next/navigation';
-import { use, useContext, useEffect, useState } from 'react';
+import { use, useEffect, useState } from 'react';
 import ChatComponent from "@components/ChatComponent";
 import React from 'react'
 import { useSelfId } from '@components/SelfIdProvider'
-import { useSession } from '@node_modules/next-auth/react';
+import { io } from "socket.io-client"
 
 const page = ({searchParams}) => {
     const params = use(searchParams)
     const [userName, setUserName] = useState("");
     const [userId, setUserId] = useState(null);
     const [userImage, setUserImage] = useState("");
+    const [unreadMessages, setUnreadMessages] = useState({});
 
     const { selfId } = useSelfId() //get global state variable for one's own id in SelfIdProvider
 
@@ -18,6 +18,51 @@ const page = ({searchParams}) => {
     const [conversation, setConversation] = useState();
 
     console.log(conversation, userName, userId, userImage);
+
+    useEffect(() => {
+      if (!conversations || !conversation || !selfId){
+        return;
+      }
+      const socket = io("http://localhost:8081");
+
+      socket.emit("joinConversation", conversation.id)
+  
+      socket.on("receiveMessage" , (message) => {
+        if (message.senderId !== selfId && message.conversation.id === conversation.id){
+          setUnreadMessages((prev) => {
+            return {
+              ...prev,
+              [message.conversation.id]: (prev[message.conversation.id] || 0) + 1,
+            }
+          })
+  
+          setConversations((conversations) => {
+            const updatedConversations = conversations.map((currentConversation) =>
+              currentConversation.conversationId === conversation.id
+                ? { ...currentConversation, lastMessageText: message.content}
+                : currentConversation
+            );
+            console.log("Updated Conversations:", updatedConversations);
+            return updatedConversations;
+          })
+        }
+      })
+      return () => {
+        socket.off("receiveMessage");
+        socket.disconnect();
+      };
+    }, [selfId, conversation, conversations, setConversations])
+
+    const handleConversationLoad = (id) => {
+      setUnreadMessages((prev) => {
+        return {
+          ...prev,
+          [id]: 0,
+        }
+      })
+    }
+
+    console.log("Unread Messages... ", unreadMessages)
 
 
   useEffect(() => {
@@ -46,6 +91,8 @@ const page = ({searchParams}) => {
     }
   }, [params, conversations])
 
+  
+
   useEffect(()=> {
     const fetchUserHasConvo = async() => {
       if (!selfId || !userId){
@@ -63,7 +110,7 @@ const page = ({searchParams}) => {
       });
   
       if (!response.ok) {
-        console.log("Failed to create conversation");
+        console.error("Failed to fetch conversation: ", response.statusText);
         return;
       }
       console.log(response.ok);
@@ -106,6 +153,7 @@ const page = ({searchParams}) => {
         ...rest,
         id: conversationId,
       }
+      handleConversationLoad(conversation.id)
       setConversation(filteredConversation)
     }
 
@@ -129,6 +177,11 @@ const page = ({searchParams}) => {
                     ? `${conversation.user1.name}: ${conversation.lastMessageText}`
                     : `${conversation.user2.name}: ${conversation.lastMessageText}`
                 }
+
+                {/* Display unread badge if there are unread messages */}
+                {unreadMessages[conversation.id] > 0 && (
+                  <span className="badge">{unreadMessages[conversation.id]}</span>
+                )}
               </div>
             </div>
           )

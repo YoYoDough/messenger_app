@@ -60,6 +60,7 @@ const ChatComponent = ({conversation, setConversation, setConversations, userId,
   
 
   const sendMessage = async(conversation) => {
+    let newConversation = null;
     // Step 1: Create the conversation if there is none fetched in the first place
     if (conversation == null){
       const response = await fetch("http://localhost:8080/api/conversations", {
@@ -78,12 +79,29 @@ const ChatComponent = ({conversation, setConversation, setConversations, userId,
         return;
       }
       console.log(response.ok);
-      const newConversation = await response.json();
+      newConversation = await response.json();
       console.log(conversation)
       setConversation(newConversation);
-    }
 
-    if (conversation != null){
+      const secondResponse = await fetch("http://localhost:8080/api/messages", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          conversationId: newConversation.id,
+          senderId: selfId,
+          input: input,
+        })
+      })
+      if (!secondResponse.ok){
+        console.error("Failed to POST message...")
+      }
+      else{
+        console.log("POST request completed, ", response)
+      }
+    }
+    if (conversation != null && newConversation == null){
       const response = await fetch("http://localhost:8080/api/messages", {
         method: "POST",
         headers: {

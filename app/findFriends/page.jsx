@@ -9,15 +9,10 @@ import { Context } from "@app/layout";
 const page = () => {
     const { data: session } = useSession();
     console.log(session);
-    const [input, setInput] = useState(""); // Search input
     const [searchResults, setSearchResults] = useState([]); // Filtered users
-    const selfNameProp = session?.user.name.split("#")[0];
-    const selfTagProp = "#" + session?.user.name.split("#")[1];
-    const {selfId, setSelfId} = useSelfId();
+    const {selfId } = useSelfId();
     const [addedFriends, setAddedFriends] = useState([]);
     const [isDisabled, setIsDisabled] = useState(false);
-    const [allUsers, setAllUsers] = useState([]); // Full list of users
-    const [showDropdown, setShowDropdown] = useState(false);
 
     console.log(searchResults);
 
@@ -44,7 +39,7 @@ const page = () => {
       console.log(response);
     }
 
-    const fetchUsersFromInput = async(input, userId) => {
+    const fetchUsersFromInput = async(input) => {
         if (!input.trim() || input.length === 0){
           setSearchResults([]);
           return;

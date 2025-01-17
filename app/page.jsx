@@ -11,6 +11,7 @@ import { useRouter } from "next/navigation";
 export default function Home() {
   const router = useRouter()
   const {data: session} = useSession();
+  console.log(session)
   const [conversations, setConversations] = useState([]);
   const {selfId, setSelfId} = useSelfId()
   console.log(selfId)
@@ -44,7 +45,7 @@ export default function Home() {
   return (
     <div className = "flex flex-col">
         {!session?.user && <LandingPage></LandingPage>}
-        {conversations.length === 0  && <div className = "conversations p-10 m-10"> 
+        {conversations.length === 0 && session  && <div className = "conversations p-10 m-10"> 
           {conversations.length === 0 && <>
             <h1 className = "head_text">Get started creating messages!</h1>
             <p>Get started by making friends <Link className = "block mt-5 underline-offset-4 hover:underline md:inline-block dark:hover:text-neutral-300  dark:text-neutral-300" href = "/findFriends"><b>here</b></Link></p>
