@@ -81,9 +81,9 @@ const ChatComponent = ({conversation, setConversation, setConversations, userId,
       console.log(response.ok);
       newConversation = await response.json();
       console.log(conversation)
-      setConversation(newConversation);
-
-      const secondResponse = await fetch("http://localhost:8080/api/messages", {
+    }
+    if (newConversation != null){
+      const response = await fetch("http://localhost:8080/api/messages", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -94,14 +94,14 @@ const ChatComponent = ({conversation, setConversation, setConversations, userId,
           input: input,
         })
       })
-      if (!secondResponse.ok){
+      if (!response.ok){
         console.error("Failed to POST message...")
       }
       else{
         console.log("POST request completed, ", response)
       }
     }
-    if (conversation != null && newConversation == null){
+    if (conversation != null){
       const response = await fetch("http://localhost:8080/api/messages", {
         method: "POST",
         headers: {
