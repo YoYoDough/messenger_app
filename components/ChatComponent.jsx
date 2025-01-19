@@ -2,11 +2,9 @@
 import { useSession } from "next-auth/react";
 import ChatNav from "./ChatNav"
 import {useState, useEffect, useRef } from 'react'
-import { io } from "socket.io-client"
 
-let socket;
 
-const ChatComponent = ({conversation, setConversation, setConversations, userId, selfId, userName, userImage}) => {
+const ChatComponent = ({socket, conversation, setConversation, setConversations, userId, selfId, userName, userImage}) => {
   
   const {data: session} = useSession()
   console.log(session)
@@ -25,7 +23,7 @@ const ChatComponent = ({conversation, setConversation, setConversations, userId,
   console.log(session?.user.name);
   
   useEffect(() => {
-    socket = io("http://localhost:8081");
+    if (!socket) return;
     console.log(socket)
     socket.on("receiveMessage", (message) => {
       setMessages((prev)=> [...prev, message]);
@@ -34,7 +32,7 @@ const ChatComponent = ({conversation, setConversation, setConversations, userId,
     return ()=>{
       socket.disconnect();
     }
-  }, [messages])
+  }, [socket])
 
   //Need to fetch previous messages next...
   useEffect(() => {
@@ -42,7 +40,7 @@ const ChatComponent = ({conversation, setConversation, setConversations, userId,
       if (conversation === null){
         return;
       }
-      if (messages == null){
+      if (messages === null){
         return;
       }
       const response = await fetch(`http://localhost:8080/api/messages/withconvo?conversationid=${conversation.id}`)
@@ -82,7 +80,9 @@ const ChatComponent = ({conversation, setConversation, setConversations, userId,
         newConversation = await response.json();
       }
     }
+
     const targetedConversation = newConversation !== null ? newConversation : conversation;
+    setConversation(targetedConversation)
     
     const response = await fetch("http://localhost:8080/api/messages", {
       method: "POST",
@@ -105,14 +105,24 @@ const ChatComponent = ({conversation, setConversation, setConversations, userId,
     
     if (input.trim()){
       if (socket) {
-        socket.emit("sendMessage", { conversation: targetedConversation, senderId: selfId, content: input}); // Pass relevant data.
-        setMessages((prev) => [...prev, { conversation: targetedConversation, senderId: selfId, content: input, }]); // Update local state.
+        socket.emit("sendMessage", { conversation: targetedConversation, sentAt: Date.now(), senderId: selfId, content: input}); // Pass relevant data.
+        setMessages((prev) => [...prev, { conversation: targetedConversation, sentAt: Date.now(), senderId: selfId, content: input, }]); // Update local state.
         setConversations((conversations) => {
           const updatedConversations = conversations.map((currentConversation) =>
             currentConversation.conversationId === targetedConversation.id
-              ? { ...currentConversation, lastMessageText: input}
+              ? { ...currentConversation, lastMessageSentAt: Date.now(), senderId: selfId, lastMessageText: input}
               : currentConversation
           );
+
+          // Add the new conversation if it's not already in the array
+          if (!updatedConversations.find((conv) => conv.conversationId === targetedConversation.id)) {
+            updatedConversations.push({
+              ...targetedConversation,
+              lastMessageSentAt: Date.now(),
+              senderId: selfId,
+              lastMessageText: input,
+            });
+          }
           console.log("Updated Conversations:", updatedConversations);
           return updatedConversations;
         })

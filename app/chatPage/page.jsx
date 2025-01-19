@@ -16,37 +16,61 @@ const page = ({searchParams}) => {
 
     const [conversations, setConversations] = useState([]);
     const [conversation, setConversation] = useState();
+    const [socket, setSocket] = useState(null)
 
     console.log(conversation, userName, userId, userImage);
+    
 
     useEffect(() => {
-      if (!conversations || !conversation || !selfId){
+      if (!conversations || !conversation || !selfId) {
         return;
       }
-      const socket = io("http://localhost:8081");
-
-      socket.emit("joinConversation", conversation.id)
-  
-      socket.on("receiveMessage" , (message) => {
-        if (message.senderId !== selfId && message.conversation.id === conversation.id){
+    
+      //need to use a global socket in context...
+    
+      // Emit the event to join the conversation on socket connection
+      socket.emit("joinConversation", conversation.id);
+    
+      socket.on("receiveMessage", (message) => {
+        if (message.senderId !== selfId) {
+          // Update the unread messages count for the relevant conversation
           setUnreadMessages((prev) => {
             return {
               ...prev,
               [message.conversation.id]: (prev[message.conversation.id] || 0) + 1,
-            }
-          })
-  
-          setConversations((conversations) => {
-            const updatedConversations = conversations.map((currentConversation) =>
-              currentConversation.conversationId === conversation.id
-                ? { ...currentConversation, lastMessageText: message.content}
+            };
+          });
+    
+          // Update the conversations array with the new message
+          setConversations((prevConversations) => {
+            const updatedConversations = prevConversations.map((currentConversation) =>
+              currentConversation.conversationId === message.conversation.id
+                ? {
+                    ...currentConversation,
+                    lastMessageText: message.content, // Update lastMessageText
+                  }
                 : currentConversation
             );
+    
+            // If this is a new conversation (doesn't exist in the list), add it to the list
+            if (!updatedConversations.find((conv) => conv.conversationId === message.conversation.id)) {
+              const { id, createdAt, ...conversationWithoutId } = message.conversation;
+              updatedConversations.push({
+                ...conversationWithoutId,
+                conversationId: id, // Rename id to conversationId
+                lastMessageSentAt: message.sentAt,
+                createdAt: createdAt,
+                senderId: message.senderId,
+                lastMessageText: message.content, // Add new conversation with the last message text
+              });
+            }
+    
             console.log("Updated Conversations:", updatedConversations);
-            return updatedConversations;
-          })
+            return updatedConversations; // Return the updated conversations array
+          });
         }
-      })
+      });
+    
       return () => {
         socket.off("receiveMessage");
         socket.disconnect();
@@ -91,7 +115,7 @@ const page = ({searchParams}) => {
     }
   }, [params, conversations])
 
-  
+  console.log(userId)
 
   useEffect(()=> {
     const fetchUserHasConvo = async() => {
@@ -110,7 +134,7 @@ const page = ({searchParams}) => {
       });
   
       if (!response.ok) {
-        console.error("Failed to fetch conversation: ", response.statusText);
+        console.log("Failed to fetch conversation: ", response.statusText);
         return;
       }
       console.log(response.ok);
@@ -188,7 +212,7 @@ const page = ({searchParams}) => {
         })}
       </div>
       
-      <ChatComponent conversation = {conversation} setConversation = {setConversation} setConversations = {setConversations} userId = {userId} selfId = {selfId} userName = {userName} userImage = {userImage}></ChatComponent>
+      <ChatComponent socket = {socket} conversation = {conversation} setConversation = {setConversation} setConversations = {setConversations} userId = {userId} selfId = {selfId} userName = {userName} userImage = {userImage}></ChatComponent>
     </div>
   )
 }
