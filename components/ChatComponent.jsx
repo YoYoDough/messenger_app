@@ -34,7 +34,7 @@ const ChatComponent = ({conversation, setConversation, setConversations, userId,
     return ()=>{
       socket.disconnect();
     }
-  }, [])
+  }, [messages])
 
   //Need to fetch previous messages next...
   useEffect(() => {
@@ -78,57 +78,38 @@ const ChatComponent = ({conversation, setConversation, setConversations, userId,
         console.error("Failed to create conversation");
         return;
       }
-      console.log(response.ok);
-      newConversation = await response.json();
-      console.log(conversation)
-    }
-    if (newConversation != null){
-      const response = await fetch("http://localhost:8080/api/messages", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          conversationId: newConversation.id,
-          senderId: selfId,
-          input: input,
-        })
-      })
-      if (!response.ok){
-        console.error("Failed to POST message...")
-      }
       else{
-        console.log("POST request completed, ", response)
+        newConversation = await response.json();
       }
     }
-    if (conversation != null){
-      const response = await fetch("http://localhost:8080/api/messages", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          conversationId: conversation.id,
-          senderId: selfId,
-          input: input,
-        })
+    const targetedConversation = newConversation !== null ? newConversation : conversation;
+    
+    const response = await fetch("http://localhost:8080/api/messages", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        conversationId: targetedConversation.id,
+        senderId: selfId,
+        input: input,
       })
-      if (!response.ok){
-        console.error("Failed to POST message...")
-      }
-      else{
-        console.log("POST request completed, ", response)
-      }
+    })
+    if (!response.ok){
+      console.error("Failed to POST message...")
+    }
+    else{
+      console.log("POST request completed, ", response)
     }
     console.log(conversation);
     
     if (input.trim()){
       if (socket) {
-        socket.emit("sendMessage", { conversation: conversation, senderId: selfId, content: input}); // Pass relevant data.
-        setMessages((prev) => [...prev, { conversation: conversation, senderId: selfId, content: input, }]); // Update local state.
+        socket.emit("sendMessage", { conversation: targetedConversation, senderId: selfId, content: input}); // Pass relevant data.
+        setMessages((prev) => [...prev, { conversation: targetedConversation, senderId: selfId, content: input, }]); // Update local state.
         setConversations((conversations) => {
           const updatedConversations = conversations.map((currentConversation) =>
-            currentConversation.conversationId === conversation.id
+            currentConversation.conversationId === targetedConversation.id
               ? { ...currentConversation, lastMessageText: input}
               : currentConversation
           );
@@ -140,10 +121,7 @@ const ChatComponent = ({conversation, setConversation, setConversations, userId,
       } else {
         console.error("Socket not initialized!");
       }
-
     }
-    
-    
   }
 
 
