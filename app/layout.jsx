@@ -4,6 +4,7 @@ import Provider from "@components/Provider"
 import Nav from "@components/Nav"
 import { usePathname } from "next/navigation";
 import SelfIdProvider from "@components/SelfIdProvider";
+import SocketProvider from "@components/SocketProvider";
 
 export const RootLayout = ({ children }) => {
   const pathname = usePathname();
@@ -17,10 +18,12 @@ export const RootLayout = ({ children }) => {
       <body>
         <Provider>
           <SelfIdProvider> 
-            <main className="flex h-screen">
-              {!hidenav && <Nav />}
-              {children}
-            </main>
+            <SocketProvider>
+              <main className="flex h-screen">
+                {!hidenav && <Nav />}
+                {children}
+              </main>
+            </SocketProvider>
           </SelfIdProvider>
         </Provider>
       </body>
