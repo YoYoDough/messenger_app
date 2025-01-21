@@ -26,64 +26,66 @@ const page = ({searchParams}) => {
 
     useEffect(() => {
       if (!conversations || !conversation || !selfId) {
-        return;
-    }
-
-
+          return;
+      }
+  
       // Emit the event to join the conversation only if it's a new conversation
       if (joinedConversationRef.current !== conversation.id) {
           socket.emit("joinConversation", conversation.id);
           console.log(`Joined conversation: ${conversation.id}`);
           joinedConversationRef.current = conversation.id; // Update the ref
       }
-
+  
       // Register the listener for receiving messages
       const handleReceiveMessage = (message) => {
+          // Update unread messages count only for inactive conversations
           if (message.senderId !== selfId) {
-              // Update unread messages count
-              setUnreadMessages((prev) => ({
-                  ...prev,
-                  [message.conversation.id]: (prev[message.conversation.id] || 0) + 1,
-              }));
-
-              // Update the conversations array with the new message
-              setConversations((prevConversations) => {
-                  const updatedConversations = prevConversations.map((currentConversation) =>
-                      currentConversation.conversationId === message.conversation.id
-                          ? {
-                                ...currentConversation,
-                                lastMessageText: message.content, // Update lastMessageText
-                            }
-                          : currentConversation
-                  );
-
-                  // Add new conversation if it doesn't exist in the list
-                  if (!updatedConversations.find((conv) => conv.conversationId === message.conversation.id)) {
-                      const { id, createdAt, ...conversationWithoutId } = message.conversation;
-                      updatedConversations.push({
-                          ...conversationWithoutId,
-                          conversationId: id, // Rename id to conversationId
-                          lastMessageSentAt: message.sentAt,
-                          createdAt: createdAt,
-                          senderId: message.senderId,
-                          lastMessageText: message.content, // Add new conversation with the last message text
-                      });
-                  }
-
-                  console.log("Updated Conversations:", updatedConversations);
-                  return updatedConversations; // Return the updated conversations array
-              });
+              if (message.conversation.id !== conversation.id) {
+                  setUnreadMessages((prev) => ({
+                      ...prev,
+                      [message.conversation.id]: (prev[message.conversation.id] || 0) + 1,
+                  }));
+              }
           }
+  
+          // Update the `lastMessageText` for the relevant conversation
+          setConversations((prevConversations) => {
+              const updatedConversations = prevConversations.map((currentConversation) =>
+                  currentConversation.conversationId === message.conversation.id
+                      ? {
+                            ...currentConversation,
+                            lastMessageText: message.content, // Update lastMessageText
+                            lastMessageSentAt: message.sentAt, // Optionally update timestamp
+                        }
+                      : currentConversation
+              );
+  
+              // If this is a new conversation (doesn't exist in the list), add it to the list
+              if (!updatedConversations.find((conv) => conv.conversationId === message.conversation.id)) {
+                  const { id, createdAt, ...conversationWithoutId } = message.conversation;
+                  updatedConversations.push({
+                      ...conversationWithoutId,
+                      conversationId: id, // Rename id to conversationId
+                      lastMessageSentAt: message.sentAt,
+                      createdAt: createdAt,
+                      senderId: message.senderId,
+                      lastMessageText: message.content, // Add new conversation with the last message text
+                  });
+              }
+  
+              console.log("Updated Conversations:", updatedConversations);
+              return updatedConversations; // Return the updated conversations array
+          });
       };
-
+  
       // Add the event listener
       socket.on("receiveMessage", handleReceiveMessage);
-
+  
       // Cleanup function
       return () => {
           socket.off("receiveMessage", handleReceiveMessage); // Remove only the specific listener
       };
-    }, [selfId, conversation, conversations, setConversations])
+  }, [selfId, conversation, conversations, setConversations]);
 
     const handleConversationLoad = (id) => {
       setUnreadMessages((prev) => {
@@ -106,10 +108,7 @@ const page = ({searchParams}) => {
     else if (conversations.length > 0){
       const latestConversation = conversations[0];
       const { lastMessageText, lastMessageSentAt, conversationId, senderId, ...rest } = latestConversation;
-      setConversation({
-        ...rest,
-        id: conversationId,
-      })
+      
       if (latestConversation.user1.id === selfId){
         setUserId(latestConversation.user2.id);
         setUserName(latestConversation.user2.name);
@@ -185,7 +184,7 @@ const page = ({searchParams}) => {
         ...rest,
         id: conversationId,
       }
-      handleConversationLoad(conversation.id)
+      handleConversationLoad(conversationId)
       setConversation(filteredConversation)
     }
 
@@ -211,8 +210,8 @@ const page = ({searchParams}) => {
                 }
 
                 {/* Display unread badge if there are unread messages */}
-                {unreadMessages[conversation.id] > 0 && (
-                  <span className="badge">{unreadMessages[conversation.id]}</span>
+                {unreadMessages[conversation.conversationId] > 0 && (
+                  <span className="badge">{unreadMessages[conversation.conversationId]}</span>
                 )}
               </div>
             </div>

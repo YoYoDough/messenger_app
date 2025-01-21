@@ -27,16 +27,23 @@ const ChatComponent = ({conversation, setConversation, setConversations, userId,
   console.log(session?.user.name);
   
   useEffect(() => {
-    if (!socket) return;
-    console.log(socket)
-    socket.on("receiveMessage", (message) => {
-      setMessages((prev)=> [...prev, message]);
-    })
+    if (!socket || !conversation) return;
+    // Handle receiving a message
+    const handleReceiveMessage = (message) => {
+        // Ensure the message is for the active conversation
+        if (message.conversation.id === conversation.id) {
+            setMessages((prev) => [...prev, message]);
+        }
+    };
 
-    return ()=>{
-      socket.disconnect();
-    }
-  }, [socket])
+    // Listen for messages
+    socket.on("receiveMessage", handleReceiveMessage);
+
+    // Cleanup function to remove the listener
+    return () => {
+        socket.off("receiveMessage", handleReceiveMessage);
+    };
+  }, [socket, conversation])
 
   //Need to fetch previous messages next...
   useEffect(() => {
