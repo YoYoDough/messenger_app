@@ -2,12 +2,16 @@
 import { useSession } from "next-auth/react";
 import ChatNav from "./ChatNav"
 import {useState, useEffect, useRef } from 'react'
+import { useSocket } from "./SocketProvider";
 
 
-const ChatComponent = ({socket, conversation, setConversation, setConversations, userId, selfId, userName, userImage}) => {
+const ChatComponent = ({conversation, setConversation, setConversations, userId, selfId, userName, userImage}) => {
   
   const {data: session} = useSession()
   console.log(session)
+
+  const socket = useSocket()
+  console.log(socket)
 
   console.log(conversation)
   

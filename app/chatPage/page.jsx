@@ -1,9 +1,10 @@
 "use client"
-import { use, useEffect, useState } from 'react';
+import { use, useRef, useEffect, useState } from 'react';
 import ChatComponent from "@components/ChatComponent";
 import React from 'react'
 import { useSelfId } from '@components/SelfIdProvider'
 import { io } from "socket.io-client"
+import { useSocket } from '@components/SocketProvider';
 
 const page = ({searchParams}) => {
     const params = use(searchParams)
@@ -16,64 +17,71 @@ const page = ({searchParams}) => {
 
     const [conversations, setConversations] = useState([]);
     const [conversation, setConversation] = useState();
-    const [socket, setSocket] = useState(null)
+    const socket = useSocket();
+
+    console.log(socket)
 
     console.log(conversation, userName, userId, userImage);
-    
+    const joinedConversationRef = useRef(null); // Track the currently joined conversation
 
     useEffect(() => {
       if (!conversations || !conversation || !selfId) {
         return;
+    }
+
+
+      // Emit the event to join the conversation only if it's a new conversation
+      if (joinedConversationRef.current !== conversation.id) {
+          socket.emit("joinConversation", conversation.id);
+          console.log(`Joined conversation: ${conversation.id}`);
+          joinedConversationRef.current = conversation.id; // Update the ref
       }
-    
-      //need to use a global socket in context...
-    
-      // Emit the event to join the conversation on socket connection
-      socket.emit("joinConversation", conversation.id);
-    
-      socket.on("receiveMessage", (message) => {
-        if (message.senderId !== selfId) {
-          // Update the unread messages count for the relevant conversation
-          setUnreadMessages((prev) => {
-            return {
-              ...prev,
-              [message.conversation.id]: (prev[message.conversation.id] || 0) + 1,
-            };
-          });
-    
-          // Update the conversations array with the new message
-          setConversations((prevConversations) => {
-            const updatedConversations = prevConversations.map((currentConversation) =>
-              currentConversation.conversationId === message.conversation.id
-                ? {
-                    ...currentConversation,
-                    lastMessageText: message.content, // Update lastMessageText
+
+      // Register the listener for receiving messages
+      const handleReceiveMessage = (message) => {
+          if (message.senderId !== selfId) {
+              // Update unread messages count
+              setUnreadMessages((prev) => ({
+                  ...prev,
+                  [message.conversation.id]: (prev[message.conversation.id] || 0) + 1,
+              }));
+
+              // Update the conversations array with the new message
+              setConversations((prevConversations) => {
+                  const updatedConversations = prevConversations.map((currentConversation) =>
+                      currentConversation.conversationId === message.conversation.id
+                          ? {
+                                ...currentConversation,
+                                lastMessageText: message.content, // Update lastMessageText
+                            }
+                          : currentConversation
+                  );
+
+                  // Add new conversation if it doesn't exist in the list
+                  if (!updatedConversations.find((conv) => conv.conversationId === message.conversation.id)) {
+                      const { id, createdAt, ...conversationWithoutId } = message.conversation;
+                      updatedConversations.push({
+                          ...conversationWithoutId,
+                          conversationId: id, // Rename id to conversationId
+                          lastMessageSentAt: message.sentAt,
+                          createdAt: createdAt,
+                          senderId: message.senderId,
+                          lastMessageText: message.content, // Add new conversation with the last message text
+                      });
                   }
-                : currentConversation
-            );
-    
-            // If this is a new conversation (doesn't exist in the list), add it to the list
-            if (!updatedConversations.find((conv) => conv.conversationId === message.conversation.id)) {
-              const { id, createdAt, ...conversationWithoutId } = message.conversation;
-              updatedConversations.push({
-                ...conversationWithoutId,
-                conversationId: id, // Rename id to conversationId
-                lastMessageSentAt: message.sentAt,
-                createdAt: createdAt,
-                senderId: message.senderId,
-                lastMessageText: message.content, // Add new conversation with the last message text
+
+                  console.log("Updated Conversations:", updatedConversations);
+                  return updatedConversations; // Return the updated conversations array
               });
-            }
-    
-            console.log("Updated Conversations:", updatedConversations);
-            return updatedConversations; // Return the updated conversations array
-          });
-        }
-      });
-    
+          }
+      };
+
+      // Add the event listener
+      socket.on("receiveMessage", handleReceiveMessage);
+
+      // Cleanup function
       return () => {
-        socket.off("receiveMessage");
-        socket.disconnect();
+          socket.off("receiveMessage", handleReceiveMessage); // Remove only the specific listener
       };
     }, [selfId, conversation, conversations, setConversations])
 

@@ -1,6 +1,6 @@
 const { Server } = require("socket.io");
 
-const io = new Server(8081, {
+const io = new Server(8082, {
     cors: {
         origin: "http://localhost:3000", // Adjusted for my Next.js port
         methods: ["GET", "POST"],
@@ -27,4 +27,4 @@ io.on("connection", (socket) => {
 });
 
 
-console.log("Socket.IO server is running on port 8081");
+console.log("Socket.IO server is running on port 8082");

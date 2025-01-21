@@ -1,19 +1,21 @@
-import React, { createContext, useContext } from 'react'
-import { io } from '@node_modules/socket.io-client/build/esm';
+import React, { useState, useEffect, createContext, useContext } from 'react'
+import { io } from "socket.io-client"
 
 const SocketContext = createContext();
-
-export const useSocket = useContext(SocketContext)
-
-const SocketProvider = ({ children }) => {
+export const SocketProvider = ({ children }) => {
     const [socket, setSocket] = useState(null);
 
     useEffect(() => {
-        const socketInstance = io("http://localhost:8081")
-        setSocket(socketInstance);
+        
+      const newSocket = io("http://localhost:8082", {
+          transports: ["websocket"], // Use WebSocket directly for stability
+      });
+
+      setSocket(newSocket);
 
         return () => {
-            socketInstance.disconnect();
+          newSocket.disconnect();
+          console.log("Socket disconnected during cleanup");
         }
     }, [])
   return (
@@ -24,3 +26,6 @@ const SocketProvider = ({ children }) => {
 }
 
 export default SocketProvider
+
+
+export const useSocket = () => useContext(SocketContext)
