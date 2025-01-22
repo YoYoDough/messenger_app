@@ -31,8 +31,11 @@ const ChatComponent = ({conversation, setConversation, setConversations, userId,
     // Handle receiving a message
     const handleReceiveMessage = (message) => {
         // Ensure the message is for the active conversation
-        if (message.conversation.id === conversation.id) {
+        // Fixed error where user would send message and see their own message twice
+        if (message.senderId !== selfId){
+          if (message.conversation.id === conversation.id) {
             setMessages((prev) => [...prev, message]);
+          }
         }
     };
 
@@ -117,6 +120,7 @@ const ChatComponent = ({conversation, setConversation, setConversations, userId,
     if (input.trim()){
       if (socket) {
         socket.emit("sendMessage", { conversation: targetedConversation, sentAt: Date.now(), senderId: selfId, content: input}); // Pass relevant data.
+        console.log("DOUBLE MESSAGES BEING SENT");
         setMessages((prev) => [...prev, { conversation: targetedConversation, sentAt: Date.now(), senderId: selfId, content: input, }]); // Update local state.
         setConversations((conversations) => {
           const updatedConversations = conversations.map((currentConversation) =>
