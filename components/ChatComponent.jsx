@@ -31,7 +31,7 @@ const ChatComponent = ({conversation, setConversation, setConversations, userId,
     // Handle receiving a message
     const handleReceiveMessage = (message) => {
         // Ensure the message is for the active conversation
-        // Fixed error where user would send message and see their own message twice
+        // Fixed error where user would send message and see their own message twice, users only see new messages when they receive messages here
         if (message.senderId !== selfId){
           if (message.conversation.id === conversation.id) {
             setMessages((prev) => [...prev, message]);
