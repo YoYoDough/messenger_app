@@ -5,6 +5,7 @@ import React from 'react'
 import { useSelfId } from '@components/SelfIdProvider'
 import { io } from "socket.io-client"
 import { useSocket } from '@components/SocketProvider';
+import ChatNav from '@components/ChatNav';
 
 const page = ({searchParams}) => {
     const params = use(searchParams)
@@ -25,7 +26,8 @@ const page = ({searchParams}) => {
     const joinedConversationRef = useRef(null); // Track the currently joined conversation
 
     useEffect(() => {
-      if (!conversations || !conversation || !selfId) {
+      // Ensure all required data is available before proceeding
+      if (!socket || !conversation || !selfId) {
           return;
       }
   
@@ -36,9 +38,18 @@ const page = ({searchParams}) => {
           joinedConversationRef.current = conversation.id; // Update the ref
       }
   
-      // Register the listener for receiving messages
+      // Handle receiving messages
       const handleReceiveMessage = (message) => {
-          // Update unread messages count only for inactive conversations
+          console.log("Message received on client:", message);
+  
+          // Check if the conversation exists in the state
+          const conversationExists = conversations.some(
+              (conv) => conv.conversationId === message.conversation.id
+          );
+          
+          console.log('Conversation exists:', conversationExists);
+  
+          // Handle unread message count for inactive conversations
           if (message.senderId !== selfId) {
               if (message.conversation.id !== conversation.id) {
                   setUnreadMessages((prev) => ({
@@ -46,46 +57,59 @@ const page = ({searchParams}) => {
                       [message.conversation.id]: (prev[message.conversation.id] || 0) + 1,
                   }));
               }
-          }
   
-          // Update the `lastMessageText` for the relevant conversation
-          setConversations((prevConversations) => {
-              const updatedConversations = prevConversations.map((currentConversation) =>
-                  currentConversation.conversationId === message.conversation.id
-                      ? {
-                            ...currentConversation,
-                            lastMessageText: message.content, // Update lastMessageText
-                            lastMessageSentAt: message.sentAt, // Optionally update timestamp
-                        }
-                      : currentConversation
-              );
+              console.log("Entered If statement");
   
-              // If this is a new conversation (doesn't exist in the list), add it to the list
-              if (!updatedConversations.find((conv) => conv.conversationId === message.conversation.id)) {
-                  const { id, createdAt, ...conversationWithoutId } = message.conversation;
-                  updatedConversations.push({
-                      ...conversationWithoutId,
-                      conversationId: id, // Rename id to conversationId
-                      lastMessageSentAt: message.sentAt,
-                      createdAt: createdAt,
-                      senderId: message.senderId,
-                      lastMessageText: message.content, // Add new conversation with the last message text
+              if (conversationExists) {
+                  // Update the existing conversation in the state
+                  setConversations((prevConversations) => 
+                      prevConversations.map((currentConversation) =>
+                          currentConversation.conversationId === message.conversation.id
+                              ? {
+                                    ...currentConversation,
+                                    lastMessageText: message.content,
+                                    lastMessageSentAt: message.sentAt,
+                                }
+                              : currentConversation
+                      )
+                  );
+              } else {
+                  // Add a new conversation if it doesn't exist
+                  setConversations((prevConversations) => {
+                      console.log('Adding new conversation:', message.conversation);
+                      const { id, createdAt, user1, user2 } = message.conversation;
+                      return [
+                          ...prevConversations,
+                          {
+                              conversationId: id,
+                              user1,
+                              user2,
+                              senderId: message.senderId,
+                              lastMessageText: message.content,
+                              lastMessageSentAt: message.sentAt,
+                              createdAt: createdAt,
+                          }
+                      ];
                   });
               }
-  
-              console.log("Updated Conversations:", updatedConversations);
-              return updatedConversations; // Return the updated conversations array
-          });
-      };
-  
-      // Add the event listener
-      socket.on("receiveMessage", handleReceiveMessage);
-  
-      // Cleanup function
-      return () => {
-          socket.off("receiveMessage", handleReceiveMessage); // Remove only the specific listener
-      };
-  }, [selfId, conversation, conversations, setConversations]);
+            }
+        };
+    
+        // Register the listener for receiving messages
+        console.log("Attaching receiveMessage listener");
+        socket.on("receiveMessage", handleReceiveMessage);
+    
+        // Cleanup function when the component unmounts or changes
+        return () => {
+            console.log("Detaching receiveMessage listener");
+            socket.off("receiveMessage", handleReceiveMessage);
+        };
+    }, [selfId, conversation, conversations, socket, joinedConversationRef.current]);
+
+  useEffect(() => {
+    console.log("Updated conversations:", conversations);
+}, [conversations]);
+
 
     const handleConversationLoad = (id) => {
       setUnreadMessages((prev) => {
@@ -184,6 +208,10 @@ const page = ({searchParams}) => {
         ...rest,
         id: conversationId,
       }
+      const otherUser = conversation.user1.id === selfId ? conversation.user2 : conversation.user1;
+      setUserName(otherUser.name);
+      setUserId(otherUser.id);
+      setUserImage(otherUser.image);
       handleConversationLoad(conversationId)
       setConversation(filteredConversation)
     }
@@ -218,6 +246,7 @@ const page = ({searchParams}) => {
           )
         })}
       </div>
+      
       
       <ChatComponent socket = {socket} conversation = {conversation} setConversation = {setConversation} setConversations = {setConversations} userId = {userId} selfId = {selfId} userName = {userName} userImage = {userImage}></ChatComponent>
     </div>

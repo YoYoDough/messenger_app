@@ -109,33 +109,35 @@ const ChatComponent = ({conversation, setConversation, setConversations, userId,
         input: input,
       })
     })
-    if (!response.ok){
-      console.error("Failed to POST message...")
-    }
-    else{
-      console.log("POST request completed, ", response)
-    }
+    console.log("POST request completed, ", response)
+    
     console.log(conversation);
     
     if (input.trim()){
       if (socket) {
-        socket.emit("sendMessage", { conversation: targetedConversation, sentAt: Date.now(), senderId: selfId, content: input}); // Pass relevant data.
-        console.log("DOUBLE MESSAGES BEING SENT");
-        setMessages((prev) => [...prev, { conversation: targetedConversation, sentAt: Date.now(), senderId: selfId, content: input, }]); // Update local state.
+        // Emit joinConversation to ensure the receiver is in the correct room
+        socket.emit("joinConversation", targetedConversation.id);
+
+        socket.emit("sendMessage", { conversation: targetedConversation, sentAt: new Date().toISOString(), senderId: selfId, content: input}); // Pass relevant data.
+        setMessages((prev) => [...prev, { conversation: targetedConversation, sentAt: new Date().toISOString(), senderId: selfId, content: input, }]); // Update local state.
         setConversations((conversations) => {
           const updatedConversations = conversations.map((currentConversation) =>
             currentConversation.conversationId === targetedConversation.id
-              ? { ...currentConversation, lastMessageSentAt: Date.now(), senderId: selfId, lastMessageText: input}
+              ? { ...currentConversation, lastMessageSentAt: new Date().toISOString(), senderId: selfId, lastMessageText: input}
               : currentConversation
           );
 
           // Add the new conversation if it's not already in the array
           if (!updatedConversations.find((conv) => conv.conversationId === targetedConversation.id)) {
+            const { id, createdAt, user1, user2 } = targetedConversation;
             updatedConversations.push({
-              ...targetedConversation,
-              lastMessageSentAt: Date.now(),
+              conversationId: id, // Rename id to conversationId
+              user1: user1,
+              user2: user2,
               senderId: selfId,
-              lastMessageText: input,
+              lastMessageText: input, // Add new conversation with the last message text
+              lastMessageSentAt: new Date().toISOString(),
+              createdAt: createdAt,
             });
           }
           console.log("Updated Conversations:", updatedConversations);
