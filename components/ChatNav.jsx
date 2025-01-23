@@ -3,7 +3,7 @@ import { useSession } from "next-auth/react"
 
 const ChatNav = ({userImage, userName}) => {
     const { data: session} = useSession();
-    const name = userName.split("#")[0]
+    const name = userName?.split("#")[0]
   return (
     <div className = "flex justify-between p-4 shadow items-center">
       <div className = "flex items-center">

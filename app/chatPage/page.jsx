@@ -27,7 +27,7 @@ const page = ({searchParams}) => {
 
     useEffect(() => {
       // Ensure all required data is available before proceeding
-      if (!socket || !conversation || !selfId) {
+      if (!conversations || !socket || !conversation || !selfId) {
           return;
       }
   
@@ -46,7 +46,7 @@ const page = ({searchParams}) => {
           const conversationExists = conversations.some(
               (conv) => conv.conversationId === message.conversation.id
           );
-          
+  
           console.log('Conversation exists:', conversationExists);
   
           // Handle unread message count for inactive conversations
@@ -60,55 +60,49 @@ const page = ({searchParams}) => {
   
               console.log("Entered If statement");
   
-              if (conversationExists) {
-                  // Update the existing conversation in the state
-                  setConversations((prevConversations) => 
-                      prevConversations.map((currentConversation) =>
-                          currentConversation.conversationId === message.conversation.id
-                              ? {
-                                    ...currentConversation,
-                                    lastMessageText: message.content,
-                                    lastMessageSentAt: message.sentAt,
-                                }
-                              : currentConversation
-                      )
+              // Update conversations state
+              setConversations((prevConversations) => {
+                  // Map over the previous conversations to update existing ones
+                  const updatedConversations = prevConversations.map((currentConversation) =>
+                      currentConversation.conversationId === message.conversation.id
+                          ? {
+                                ...currentConversation,
+                                lastMessageText: message.content, // Update lastMessageText
+                                lastMessageSentAt: message.sentAt, // Update timestamp
+                            }
+                          : currentConversation
                   );
-              } else {
-                  // Add a new conversation if it doesn't exist
-                  setConversations((prevConversations) => {
-                      console.log('Adding new conversation:', message.conversation);
-                      const { id, createdAt, user1, user2 } = message.conversation;
-                      return [
-                          ...prevConversations,
-                          {
-                              conversationId: id,
-                              user1,
-                              user2,
-                              senderId: message.senderId,
-                              lastMessageText: message.content,
-                              lastMessageSentAt: message.sentAt,
-                              createdAt: createdAt,
-                          }
-                      ];
-                  });
-              }
-            }
-        };
-    
-        // Register the listener for receiving messages
-        console.log("Attaching receiveMessage listener");
-        socket.on("receiveMessage", handleReceiveMessage);
-    
-        // Cleanup function when the component unmounts or changes
-        return () => {
-            console.log("Detaching receiveMessage listener");
-            socket.off("receiveMessage", handleReceiveMessage);
-        };
-    }, [selfId, conversation, conversations, socket, joinedConversationRef.current]);
-
-  useEffect(() => {
-    console.log("Updated conversations:", conversations);
-}, [conversations]);
+  
+                  // If the conversation doesn't exist, add it to the updated list
+                  if (!updatedConversations.find((conv) => conv.conversationId === message.conversation.id)) {
+                      const { id, createdAt, ...conversationWithoutId } = message.conversation;
+                      updatedConversations.push({
+                          ...conversationWithoutId,
+                          conversationId: id, // Rename id to conversationId
+                          lastMessageSentAt: message.sentAt, // Add timestamp
+                          createdAt: createdAt, // Add creation date
+                          senderId: message.senderId, // Add senderId
+                          lastMessageText: message.content, // Add last message text
+                      });
+                  }
+  
+                  // Return the updated list of conversations
+                  console.log("Updated Conversations:", updatedConversations);
+                  return updatedConversations;
+              });
+          }
+      };
+  
+      // Always register the listener for receiving messages
+      console.log("Attaching receiveMessage listener");
+      socket.on("receiveMessage", handleReceiveMessage);
+  
+      // Cleanup function when the component unmounts or changes
+      return () => {
+          console.log("Detaching receiveMessage listener");
+          socket.off("receiveMessage", handleReceiveMessage);
+      };
+  }, [selfId, conversation, conversations, socket]); 
 
 
     const handleConversationLoad = (id) => {
@@ -208,10 +202,6 @@ const page = ({searchParams}) => {
         ...rest,
         id: conversationId,
       }
-      const otherUser = conversation.user1.id === selfId ? conversation.user2 : conversation.user1;
-      setUserName(otherUser.name);
-      setUserId(otherUser.id);
-      setUserImage(otherUser.image);
       handleConversationLoad(conversationId)
       setConversation(filteredConversation)
     }

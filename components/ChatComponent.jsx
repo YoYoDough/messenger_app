@@ -115,8 +115,6 @@ const ChatComponent = ({conversation, setConversation, setConversations, userId,
     
     if (input.trim()){
       if (socket) {
-        // Emit joinConversation to ensure the receiver is in the correct room
-        socket.emit("joinConversation", targetedConversation.id);
 
         socket.emit("sendMessage", { conversation: targetedConversation, sentAt: new Date().toISOString(), senderId: selfId, content: input}); // Pass relevant data.
         setMessages((prev) => [...prev, { conversation: targetedConversation, sentAt: new Date().toISOString(), senderId: selfId, content: input, }]); // Update local state.
@@ -151,10 +149,12 @@ const ChatComponent = ({conversation, setConversation, setConversations, userId,
     }
   }
 
+  const otherUser = conversation?.user1.id === selfId ? conversation?.user2 : conversation?.user1;
+  console.log(otherUser)
 
   return (
     <div className = "flex flex-col w-full h-screen">
-      <ChatNav userName = {userName} userImage = {userImage}></ChatNav>
+      <ChatNav userName = {otherUser?.name} userImage = {otherUser?.image}></ChatNav>
       {/* Messages Area */}
       <div className="flex-1 flex flex-col gap-2 overflow-y-auto p-4">
         {messages.map((msg, index) => {
