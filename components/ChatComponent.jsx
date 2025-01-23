@@ -154,7 +154,7 @@ const ChatComponent = ({conversation, setConversation, setConversations, userId,
 
   return (
     <div className = "flex flex-col w-full h-screen">
-      <ChatNav userName = {otherUser?.name} userImage = {otherUser?.image}></ChatNav>
+      {!conversation ? <ChatNav userName = {userName} userImage = {userImage}></ChatNav> : <ChatNav userName = {otherUser?.name} userImage = {otherUser?.image}></ChatNav>}
       {/* Messages Area */}
       <div className="flex-1 flex flex-col gap-2 overflow-y-auto p-4">
         {messages.map((msg, index) => {
