@@ -12,7 +12,6 @@ const page = () => {
     const [searchResults, setSearchResults] = useState([]); // Filtered users
     const {selfId } = useSelfId();
     const [addedFriends, setAddedFriends] = useState([]);
-    const [isDisabled, setIsDisabled] = useState(false);
 
     console.log(searchResults);
 
@@ -34,7 +33,6 @@ const page = () => {
         })
       })
       setAddedFriends((prev)=> [...prev, user.id])
-      setIsDisabled(true);
 
       console.log(response);
     }
@@ -61,9 +59,14 @@ const page = () => {
         setSearchResults(result);
     }
 
+    let debounceTimer;
     const handleChange = (e) =>{
-        fetchUsersFromInput(e.target.value)
-        setInput(e.target.value)
+        const input = e.target.value;
+
+        clearTimeout(debounceTimer);
+        debounceTimer = setTimeout(() => {
+          fetchUsersFromInput(input);
+        }, 300); // wait 300ms after user stops typing
     }
     
     useEffect(() => {
@@ -81,7 +84,7 @@ const page = () => {
       };
   
       fetchFriends();
-  }, [session?.user.email]);
+  }, []);
     console.log(addedFriends)
 
     
@@ -103,7 +106,7 @@ const page = () => {
               </div>
               
               <div className = "flex justify-center items-center">
-                <button title = {isDisabled === true || addedFriends.includes(user.id) ? "Friend added": "Add as a friend"} onClick = {() => handleFriendAdd(user)} className = "flex w-10 align-self-center hover:bg-gray-400 rounded-full mr-1" disabled = {addedFriends.includes(user.id) || isDisabled}><img src = "addFriend.png" alt = "Add friend image"></img></button>
+                <button title = {addedFriends.includes(user.id) ? "Friend added": "Add as a friend"} onClick = {() => handleFriendAdd(user)} className = "flex w-10 align-self-center hover:bg-gray-400 rounded-full mr-1" disabled = {addedFriends.includes(user.id)}><img src = "addFriend.png" alt = "Add friend image"></img></button>
                 <Link href = {{pathname: "/chatPage", query: {userId: user.id, userName: user.name, userImage: user.image}}}><button title = "Send message" className = "flex w-10 align-self-center hover:bg-gray-400 rounded-full p-1"><img src = "sendMessage.png" alt = "Send message image"></img></button></Link>
               </div>
             </div>

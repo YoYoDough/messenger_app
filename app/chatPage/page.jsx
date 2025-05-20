@@ -6,8 +6,12 @@ import { useSelfId } from '@components/SelfIdProvider'
 import { io } from "socket.io-client"
 import { useSocket } from '@components/SocketProvider';
 import ChatNav from '@components/ChatNav';
+import { useSession } from '@node_modules/next-auth/react';
+import { useRouter } from '@node_modules/next/navigation';
 
 const page = ({searchParams}) => {
+    const router = useRouter()
+    const {data: status } = useSession
     const params = use(searchParams)
     const [userName, setUserName] = useState("");
     const [userId, setUserId] = useState(null);
@@ -24,7 +28,13 @@ const page = ({searchParams}) => {
 
     console.log(conversation, userName, userId, userImage);
     const joinedConversationRef = useRef(null); // Track the currently joined conversation
+    useEffect(() => {
+      if (status === "loading") return; // Wait until session status is known
 
+      if (status === "unauthenticated") {
+        router.push("/");
+      }
+    }, [status, router]);
     useEffect(() => {
       // Ensure all required data is available before proceeding
       if (!conversations || !socket || !conversation || !selfId) {
@@ -206,6 +216,41 @@ const page = ({searchParams}) => {
       setConversation(filteredConversation)
     }
 
+    function formatSentAt(sentAt) {
+      console.log(sentAt)
+      const sentDate = new Date(sentAt);
+      const now = new Date();
+      console.log(now)
+      const diffMs = now - sentDate;
+      const diffMin = Math.floor(diffMs / 60000);
+    
+      if (diffMin < 1) return "now";
+    
+      const isToday =
+        sentDate.getDate() === now.getDate() &&
+        sentDate.getMonth() === now.getMonth() &&
+        sentDate.getFullYear() === now.getFullYear();
+    
+      const hours = sentDate.getHours();
+      const minutes = sentDate.getMinutes();
+      const ampm = hours >= 12 ? "PM" : "AM";
+      const formattedHours = hours % 12 || 12;
+      const formattedMinutes = minutes.toString().padStart(2, "0");
+      const timeString = `${formattedHours}:${formattedMinutes} ${ampm}`;
+    
+      if (isToday) {
+        return `today at ${timeString}`;
+      }
+    
+      const dateString = sentDate.toLocaleDateString("en-US", {
+        month: "short",
+        day: "numeric",
+        year: "numeric",
+      });
+    
+      return `${dateString} at ${timeString}`;
+    }
+
   return (
     <div className = "flex w-full">
       <div className = "w-96">
@@ -220,12 +265,18 @@ const page = ({searchParams}) => {
               </div>
               
               <div className = "flex mt-3 items-center p-1">
-                {conversation.senderId === selfId && conversation.lastMessageText !== "" 
-                  ? `You: ${conversation.lastMessageText}` 
-                  : conversation.user1.id !== selfId 
-                    ? `${conversation.user1.name}: ${conversation.lastMessageText}`
-                    : `${conversation.user2.name}: ${conversation.lastMessageText}`
-                }
+                <p className = "break-words w-[85%]">
+                  {conversation.senderId === selfId && conversation.lastMessageText !== "" 
+                    ? `You: ${conversation.lastMessageText}` 
+                    : conversation.user1.id !== selfId 
+                      ? `${conversation.user1.name}: ${conversation.lastMessageText}`
+                      : `${conversation.user2.name}: ${conversation.lastMessageText}`
+                  }
+                </p>
+                
+                <span className="ml-2 text-xs text-gray-500">
+                  ({formatSentAt(conversation.lastMessageSentAt)})
+                </span>
 
                 {/* Display unread badge if there are unread messages */}
                 {unreadMessages[conversation.conversationId] > 0 && (
@@ -238,7 +289,7 @@ const page = ({searchParams}) => {
       </div>
       
       
-      <ChatComponent socket = {socket} conversation = {conversation} setConversation = {setConversation} setConversations = {setConversations} userId = {userId} selfId = {selfId} userName = {userName} userImage = {userImage}></ChatComponent>
+      <ChatComponent formatSentAt = {formatSentAt} socket = {socket} conversation = {conversation} setConversation = {setConversation} setConversations = {setConversations} userId = {userId} selfId = {selfId} userName = {userName} userImage = {userImage}></ChatComponent>
     </div>
   )
 }

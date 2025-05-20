@@ -67,6 +67,9 @@ const page = () => {
               password,
               redirect: false,
           });
+          if (session?.user){
+            router.push("/")
+          }
   
           if (signInRes.error) {
               console.error("Failed to sign in:", signInRes.error);

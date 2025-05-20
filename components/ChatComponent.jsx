@@ -5,7 +5,7 @@ import {useState, useEffect, useRef } from 'react'
 import { useSocket } from "./SocketProvider";
 
 
-const ChatComponent = ({conversation, setConversation, setConversations, userId, selfId, userName, userImage}) => {
+const ChatComponent = ({formatSentAt, conversation, setConversation, setConversations, userId, selfId, userName, userImage}) => {
   
   const {data: session} = useSession()
   console.log(session)
@@ -165,14 +165,14 @@ const ChatComponent = ({conversation, setConversation, setConversations, userId,
             
               <div className = "flex items-center mb-2">
                 <img className = "w-12" src = {userConnectedToSender.image}></img>
-                <p className = "flex">{userConnectedToSender.name.split("#")[0]} {msg.sentAt}</p>
+                <p className = "flex"><span className = "mr-1">{userConnectedToSender.name.split("#")[0] }</span> <b>{formatSentAt(msg.sentAt) }</b></p>
               </div>
             
             
             <div
               key={index}
-              className={`inline-block w-fit max-w-[80%] p-3 rounded-md mb-1 text-black ${
-                msg.senderId !== selfId ? "bg-gray-300 self-end" : "bg-blue-500 text-white"
+              className={`w-fit max-w-[80%] p-3 rounded-md mb-1 text-black ${
+                msg.senderId !== selfId ? "bg-gray-300" : "bg-blue-500 text-white"
               } break-words`}
             >
               
@@ -204,7 +204,7 @@ const ChatComponent = ({conversation, setConversation, setConversations, userId,
           onKeyDown={(e) => {if (e.key === "Enter") sendMessage(conversation)}}
           onChange={(e) => setInput(e.target.value)}
           className="flex-1 p-2 rounded-md outline-none bg-black bg-opacity-50 text-white placeholder-gray-200"
-          placeholder={`Message @${name}`}
+          placeholder={`Message @${otherUser.name}`}
           
         />
         <button

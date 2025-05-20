@@ -2,7 +2,6 @@ import { signOut } from 'next-auth/react';
 import Link from 'next/link';
 import { useState } from 'react'
 
-
 const Dropdown = () => {
     const [signOutClicked, setSignOutClicked] = useState(false);
 
@@ -10,7 +9,7 @@ const Dropdown = () => {
         setSignOutClicked(true);
     }
 
-    signOutClicked === true ? signOut() : null
+    signOutClicked === true ? signOut({ callbackUrl: "/" }) : null
 
   return (
     <div className="dropdown mb-12">
