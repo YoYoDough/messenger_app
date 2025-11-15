@@ -1,3 +1,18 @@
+A messenger app with user authentication where users can chat to other users individually and in groups. 
+This will be designed with the React library and a backend framework Java Spring Boot.
+
+### 🎞️ Demo 1
+![Demo 1](public/demos/demo1.gif)
+
+### 🎞️ Demo 2
+![Demo 2](public/demos/demo2.gif)
+
+### 🎞️ Demo 3
+![Demo 3](public/demos/demo3.gif)
+
+### 🎞️ Demo 4
+![Demo 4](public/demos/demo4.gif)
+
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
 
 ## Getting Started
@@ -34,5 +49,3 @@ You can check out [the Next.js GitHub repository](https://github.com/vercel/next
 The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
 
 Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
-
-A messenger app with user authentication where users can chat to other users individually and in groups. This will be designed with the React library and a backend framework Java Spring Boot.

@@ -59,7 +59,7 @@ const handler = NextAuth({
     
             if (userExistsResponse.status === 404) {
               // Send Google user data to your backend
-              const response = await fetch('http://localhost:8080/api/users', {
+              const response = await fetch('http://localhost:8080/api/users/add', {
                 method: 'POST',
                 headers: {
                   'Content-Type': 'application/json',
@@ -76,7 +76,7 @@ const handler = NextAuth({
                 throw new Error('Failed to save Google user data to backend');
               }
               if (response.ok){
-                userDataResponse = await response.json();
+                const userDataResponse = await response.json();
                 user.name = userDataResponse.name;
                 console.log("User Data Response: ", userDataResponse)
                 

@@ -10,8 +10,8 @@ export const SelfIdProvider = ({children}) => {
     const {data: session } = useSession();
 
 
-    const selfNameProp = session?.user.name.split("#")[0];
-    const selfTagProp = "#" + session?.user.name.split("#")[1];
+    const selfNameProp = session?.user?.name?.split("#")[0];
+    const selfTagProp = "#" + session?.user?.name?.split("#")[1];
 
     useEffect(() => {
         const getSelfId = async () => {

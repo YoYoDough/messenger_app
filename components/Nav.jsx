@@ -57,7 +57,7 @@ const Nav = ({noNav}) => {
         {session?.user && (
           <div className = "navButtons mt-2">
             <NavButtons title = "Messages" hrefLink = "/chatPage" src = "messageIcon.png" alt = "Messages Icon"/>
-            <NavButtons title = "Find Friends" hrefLink = "/findFriends" src = "friends.png" alt = "Friends Icon"/>
+            <NavButtons title = "Find Friends" hrefLink = "/findFriends" src = "searchImage.png" alt = "Friends Icon"/>
             <NavButtons title = "Groups" hrefLink = "/groups" src = "groupIcon.png" alt = "Groups Icon"/>
           </div>
         )}

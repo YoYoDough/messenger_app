@@ -149,7 +149,7 @@ const ChatComponent = ({formatSentAt, conversation, setConversation, setConversa
     }
   }
 
-  const otherUser = conversation?.user1.id === selfId ? conversation?.user2 : conversation?.user1;
+  const otherUser = conversation?.user1?.id === selfId ? conversation?.user2 : conversation?.user1;
   console.log(otherUser)
 
   return (
@@ -204,7 +204,7 @@ const ChatComponent = ({formatSentAt, conversation, setConversation, setConversa
           onKeyDown={(e) => {if (e.key === "Enter") sendMessage(conversation)}}
           onChange={(e) => setInput(e.target.value)}
           className="flex-1 p-2 rounded-md outline-none bg-black bg-opacity-50 text-white placeholder-gray-200"
-          placeholder={`Message @${otherUser.name}`}
+          placeholder={`Message @${userName}`}
           
         />
         <button
