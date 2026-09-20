@@ -2,6 +2,7 @@ import NextAuth from 'next-auth';
 import GoogleProvider from 'next-auth/providers/google';
 import CredentialsProvider from "next-auth/providers/credentials";
 
+const API_URL = process.env.API_URL_INTERNAL ?? "http://localhost:8080";
 
 const handler = NextAuth({
     providers: [
@@ -19,7 +20,7 @@ const handler = NextAuth({
         async authorize(credentials){
           try {
             // Send POST request to backend to register the user
-            const res = await fetch("http://localhost:8080/api/users/login", {
+            const res = await fetch(`${API_URL}/api/users/login`, {
               method: "POST",
               headers: {
                 "Content-Type": "application/json",
@@ -55,11 +56,11 @@ const handler = NextAuth({
         try {
           if (account.provider === "google") {
             // Handle Google sign-in
-            const userExistsResponse = await fetch(`http://localhost:8080/api/users/exists?email=${profile.email}`);
+            const userExistsResponse = await fetch(`${API_URL}/api/users/exists?email=${encodeURIComponent(profile.email)}`);
     
             if (userExistsResponse.status === 404) {
               // Send Google user data to your backend
-              const response = await fetch('http://localhost:8080/api/users/add', {
+              const response = await fetch(`${API_URL}/api/users/add`, {
                 method: 'POST',
                 headers: {
                   'Content-Type': 'application/json',
